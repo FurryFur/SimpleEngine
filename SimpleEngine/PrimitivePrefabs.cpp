@@ -88,7 +88,7 @@ namespace Prefabs {
 
 	Entity& createCamera(Scene& scene, const glm::vec3& pos, const glm::vec3& center, const glm::vec3& up)
 	{
-		Entity& entity = scene.createEntity(COMPONENT_CAMERA);
+		Entity& entity = scene.createEntity(COMPONENT_CAMERA, COMPONENT_TRANSFORM);
 
 		entity.camera.setLookAt(pos, center, up);
 

@@ -31,7 +31,24 @@ InputSystem::InputSystem(Scene& scene)
 
 void InputSystem::beginFrame()
 {
-	
+	static glm::dvec2 lastMousePos;
+	GLFWwindow* window = glfwGetCurrentContext();
+
+	// Set previous mouse pos to current mouse pos on first run
+	static bool firstRun = true;
+	if (firstRun) {
+		glfwGetCursorPos(window, &lastMousePos.x, &lastMousePos.y);
+		firstRun = false;
+	}
+
+	// Update input from mouse
+	glm::dvec2 mousePos;
+	glfwGetCursorPos(window, &mousePos.x, &mousePos.y);
+
+	// Update mouse delta
+	m_mouseDelta = mousePos - lastMousePos;
+
+	lastMousePos = mousePos;
 }
 
 void InputSystem::update(Entity& entity)
@@ -96,4 +113,34 @@ void InputSystem::update(Entity& entity)
 		input.acceleratorDown = btns[inputMap.accelerationBtnMap];
 		input.brakeDown = btns[inputMap.brakeBtnMap];
 	}
+
+	// Update input from mouse
+	input.orientationDelta = {};
+	if (inputMap.mouseInputEnabled)
+		input.orientationDelta = glm::vec3{ m_mouseDelta, 0 };
+
+	// Update input from buttons
+	input.axis = {};
+	if (inputMap.leftBtnMap && glfwGetKey(window, inputMap.leftBtnMap) == GLFW_PRESS)
+		input.axis.x -= 1;
+	if (inputMap.rightBtnMap && glfwGetKey(window, inputMap.rightBtnMap) == GLFW_PRESS)
+		input.axis.x += 1;
+	if (inputMap.forwardBtnMap && glfwGetKey(window, inputMap.forwardBtnMap) == GLFW_PRESS)
+		input.axis.z += 1;
+	if (inputMap.backwardBtnMap && glfwGetKey(window, inputMap.backwardBtnMap) == GLFW_PRESS)
+		input.axis.z -= 1;
+	if (inputMap.downBtnMap && glfwGetKey(window, inputMap.downBtnMap) == GLFW_PRESS)
+		input.axis.y -= 1;
+	if (inputMap.upBtnMap && glfwGetKey(window, inputMap.upBtnMap) == GLFW_PRESS)
+		input.axis.y += 1;
+	if (inputMap.azimuthPosBtnMap && glfwGetKey(window, inputMap.azimuthPosBtnMap) == GLFW_PRESS)
+		input.orientationDelta.x += 1;
+	if (inputMap.azimuthNegBtnMap && glfwGetKey(window, inputMap.azimuthNegBtnMap) == GLFW_PRESS)
+		input.orientationDelta.x -= 1;
+	if (inputMap.elevationPosBtnMap && glfwGetKey(window, inputMap.elevationPosBtnMap) == GLFW_PRESS)
+		input.orientationDelta.y += 1;
+	if (inputMap.elevationNegBtnMap && glfwGetKey(window, inputMap.elevationNegBtnMap) == GLFW_PRESS)
+		input.orientationDelta.y -= 1;
+	if (inputMap.rollBtnMap && glfwGetKey(window, inputMap.rollBtnMap) == GLFW_PRESS)
+		input.orientationDelta.z += 1; 
 }

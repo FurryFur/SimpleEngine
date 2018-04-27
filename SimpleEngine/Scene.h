@@ -49,7 +49,7 @@ private:
 template<typename ...ComponentTs>
 inline Entity& Scene::createEntity(size_t firstComponent, ComponentTs... rest)
 {
-	size_t componentMask = Entity::assembleComponentTypeMask(firstComponent, rest...);
+	size_t componentMask = Entity::assembleComponentMask(firstComponent, rest...);
 	Entity& entity = createEntity(componentMask);
 	return entity;
 }

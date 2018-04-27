@@ -103,8 +103,8 @@ glm::vec3 followLeader(glm::vec3 targetPosition, glm::vec3 targetVelocity, glm::
 void steer(Entity& entity, const glm::vec3& steeringAcceleration)
 {
 	// Weight the acceleration according to entities acceleration weight
-	entity.physics.acceleration = steeringAcceleration * entity.controlVars.accelerationWeight;
+	entity.physics.acceleration = steeringAcceleration * entity.vehicleMovement.accelerationWeight;
 
 	// Limit the steering acceleration.
-	entity.physics.acceleration = GLMUtils::limitVec<glm::vec3>(entity.physics.acceleration, entity.controlVars.maxAcceleration);
+	entity.physics.acceleration = GLMUtils::limitVec<glm::vec3>(entity.physics.acceleration, entity.vehicleMovement.maxAcceleration);
 }

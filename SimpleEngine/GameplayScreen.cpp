@@ -11,6 +11,7 @@
 #include "LevelLoader.h"
 #include "CameraSystem.h"
 #include "SnakeTailSystem.h"
+#include "BasicCameraMovementSystem.h"
 #include "Utils.h"
 
 #include <cmath>
@@ -20,6 +21,7 @@ GameplayScreen::GameplayScreen()
 {
 	// Init systems
 	m_activeSystems.push_back(std::make_unique<InputSystem>(m_scene));
+	auto basicCameraMovementSystem = std::make_unique<BasicCameraMovementSystem>(m_scene);
 	auto renderSystem = std::make_unique<RenderSystem>(m_scene);
 
 	// Create environment map / skybox
@@ -46,10 +48,12 @@ GameplayScreen::GameplayScreen()
 	// Setup the camera
 	Entity& cameraEntity = Prefabs::createCamera(m_scene, { 0, 50, 50 }, { 0, 0, 0 }, { 0, 1, 0 });
 	renderSystem->setCamera(&cameraEntity);
+	basicCameraMovementSystem->setCameraToControl(&cameraEntity);
 
 	Prefabs::createTerrain(m_scene, "Assets/Textures/Heightmaps/heightmap_2.png", 100, 100);
 
 	m_activeSystems.push_back(std::move(renderSystem));
+	m_activeSystems.push_back(std::move(basicCameraMovementSystem));
 }
 
 

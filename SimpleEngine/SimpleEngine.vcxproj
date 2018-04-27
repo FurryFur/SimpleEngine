@@ -163,6 +163,7 @@ xcopy "$(ProjectDir)ext\assimp\lib_64\assimp-vc140-mt.dll" "$(OutDir)" /dsy</Com
   <ItemGroup>
     <ClCompile Include="AIUtils.cpp" />
     <ClCompile Include="Audio.cpp" />
+    <ClCompile Include="BasicCameraMovementSystem.cpp" />
     <ClCompile Include="CameraComponent.cpp" />
     <ClCompile Include="CameraSystem.cpp" />
     <ClCompile Include="Clock.cpp" />
@@ -196,10 +197,11 @@ xcopy "$(ProjectDir)ext\assimp\lib_64\assimp-vc140-mt.dll" "$(OutDir)" /dsy</Com
   <ItemGroup>
     <ClInclude Include="AIUtils.h" />
     <ClInclude Include="Audio.h" />
+    <ClInclude Include="BasicCameraMovementComponent.h" />
+    <ClInclude Include="BasicCameraMovementSystem.h" />
     <ClInclude Include="CameraComponent.h" />
     <ClInclude Include="CameraSystem.h" />
     <ClInclude Include="Clock.h" />
-    <ClInclude Include="ControlComponent.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="EntityEventListener.h" />
     <ClInclude Include="Game.h" />

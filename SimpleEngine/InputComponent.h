@@ -20,7 +20,12 @@
 #include <array>
 
 struct InputComponent {
+	// Vehicle inputs
 	float turnAxis;
 	bool acceleratorDown;
 	bool brakeDown;
+
+	// Direct camera control inputs
+	glm::vec3 orientationDelta;
+	glm::vec3 axis; // Allows movement is all three axes
 };

@@ -5,9 +5,9 @@ class Entity;
 class EntityEventListener {
 public:
 	// Triggers just after the components in the component mask have been added
-	virtual void onAddedComponents(Entity& entity, size_t componentMaskToAdded) = 0;
+	virtual void onPostAddComponents(Entity& entity, size_t componentMaskToAdded) = 0;
 	// Triggers just before the components in the component mask are removed
-	virtual void onBeforeRemoveComponents(Entity& entity, size_t componentMaskToRemove) = 0;
+	virtual void onPreRemoveComponents(Entity& entity, size_t componentMaskToRemove) = 0;
 	// Triggered when an entity is created in the scene.
 	// This event will fire after the entity has been fully initialized.
 	virtual void onEntityCreation(Entity& entity) = 0;

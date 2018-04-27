@@ -34,4 +34,7 @@ public:
 	// Does per frame input system update
 	void beginFrame() override;
 	void endFrame() override {};
+
+private:
+	glm::vec2 m_mouseDelta;
 };

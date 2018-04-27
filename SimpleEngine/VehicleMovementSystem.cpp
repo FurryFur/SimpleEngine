@@ -6,7 +6,7 @@
 //
 // (c) 2017 Media Design School
 //
-// Description  : A system which handles movement based on an
+// Description  : A system which handles vehicleMovement based on an
 //                entities input state.
 // Author       : Lance Chaney
 // Mail         : lance.cha7337@mediadesign.school.nz
@@ -57,14 +57,14 @@ void VehicleMovementSystem::update(Entity& entity)
 	//vec3 steeringDir = normalize(vec3{ -entity.physics.velocity.y, 0, entity.physics.velocity.x });
 	//float velocityMag = length(entity.physics.velocity);
 	//entity.physics.acceleration += entity.input.turnAxis * steeringDir * velocityMag;
-	// TODO: Add max steering amount to movement component
+	// TODO: Add max steering amount to vehicleMovement component
 
 	// Get orientation vectors
 	vec3 forward = glm::rotateY(vec4{ 1, 0, 0, 0 }, entity.transform.eulerAngles.y);
 	vec3 right = glm::rotateY(vec4{ 0, 0, 1, 0 }, entity.transform.eulerAngles.y);
 
 	// Project acceleration onto right vector and apply static and dynamic friction in this direction
-	// TODO: Add sideways friction to movement component
+	// TODO: Add sideways friction to vehicleMovement component
 	const float sidewaysStaticFrictionMaxMag = 10.0f;
 	const float sidewaysDynamicFrictionMag = 7.5f;
 	vec3 sidewaysForce = glm::dot(right, entity.physics.acceleration) * right;
@@ -80,13 +80,13 @@ void VehicleMovementSystem::update(Entity& entity)
 
 	if (entity.input.acceleratorDown) {
 		// Apply acceleration force
-		// TODO: Obay a max speed and acceleration variable set in the movement component
+		// TODO: Obay a max speed and acceleration variable set in the vehicleMovement component
 		
 		entity.physics.acceleration += forward * 10.0f;
 	}
 
 	if (entity.input.brakeDown) {
-		// TODO: Obay a max reverse speed and acceleration variable set in the movement component
+		// TODO: Obay a max reverse speed and acceleration variable set in the vehicleMovement component
 
 		entity.physics.acceleration += -entity.physics.velocity * 5.0f;
 	}
