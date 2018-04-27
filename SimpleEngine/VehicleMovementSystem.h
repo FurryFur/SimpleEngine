@@ -19,9 +19,9 @@
 class Scene;
 class Entity;
 
-class MovementSystem : public System {
+class VehicleMovementSystem : public System {
 public:
-	MovementSystem(Scene& scene);
+	VehicleMovementSystem(Scene& scene);
 
 	// Updates the entities position from input
 	void update(Entity& entity) override;

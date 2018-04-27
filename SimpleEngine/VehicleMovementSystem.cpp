@@ -14,9 +14,9 @@
 
 #define _USE_MATH_DEFINES
 
-#include "MovementSystem.h"
+#include "VehicleMovementSystem.h"
 
-#include "MovementComponent.h"
+#include "VehicleMovementComponent.h"
 #include "PrimitivePrefabs.h"
 #include "GLUtils.h"
 #include "GLMUtils.h"
@@ -35,15 +35,15 @@
 
 using namespace glm;
 
-MovementSystem::MovementSystem(Scene& scene)
+VehicleMovementSystem::VehicleMovementSystem(Scene& scene)
 	: System{ scene }
 {
 }
 
-void MovementSystem::update(Entity& entity)
+void VehicleMovementSystem::update(Entity& entity)
 {
 	// Filter movable
-	const size_t kMovableMask = COMPONENT_MOVEMENT | COMPONENT_INPUT | COMPONENT_TRANSFORM;
+	const size_t kMovableMask = COMPONENT_VEHICLE_MOVEMENT | COMPONENT_INPUT | COMPONENT_TRANSFORM;
 	if (!entity.hasComponents(kMovableMask))
 		return;
 

@@ -13,6 +13,6 @@
 
 #pragma once
 
-struct MovementComponent {
+struct VehicleMovementComponent {
 
 };

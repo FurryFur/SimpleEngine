@@ -2,7 +2,7 @@
 
 #include "InputComponent.h"
 #include "ModelComponent.h"
-#include "MovementComponent.h"
+#include "VehicleMovementComponent.h"
 #include "InputMapComponent.h"
 #include "PhysicsComponent.h"
 #include "TransformComponent.h"
@@ -21,7 +21,7 @@ enum ComponentType {
 	COMPONENT_PHYSICS = 1 << 1,
 	COMPONENT_MODEL = 1 << 2,
 	COMPONENT_CAMERA = 1 << 3,
-	COMPONENT_MOVEMENT = 1 << 4,
+	COMPONENT_VEHICLE_MOVEMENT = 1 << 4,
 	COMPONENT_INPUT = 1 << 5,
 	COMPONENT_INPUT_MAP = 1 << 6,
 	COMPONENT_PICKUP = 1 << 7,
@@ -38,7 +38,7 @@ public:
 	TransformComponent transform;
 	PhysicsComponent physics;
 	ModelComponent model;
-	MovementComponent movement;
+	VehicleMovementComponent movement;
 	InputComponent input;
 	InputMapComponent inputMap;
 	CameraComponent camera;
