@@ -1,7 +1,7 @@
 #include "Log.h"
 
 Log::Log()
-	: m_willWriteToConsole{ false }
+	: m_willWriteToConsole{ true }
 	, m_filePath{}
 {
 }

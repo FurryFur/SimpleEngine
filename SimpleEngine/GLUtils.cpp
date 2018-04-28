@@ -124,6 +124,24 @@ Shader& GLUtils::getSkyboxShader()
 	return s_shader;
 }
 
+Shader& GLUtils::getFullscreenQuadShader()
+{
+	static Shader s_shader = compileAndLinkShaders(
+		"Assets/Shaders/fullscreen_quad_vert.glsl",
+		"Assets/Shaders/fullscreen_quad_frag.glsl");
+
+	return s_shader;
+}
+
+Shader& GLUtils::getPPEdgeDetectShader()
+{
+	static Shader s_shader = compileAndLinkShaders(
+		"Assets/Shaders/fullscreen_quad_vert.glsl",
+		"Assets/Shaders/pp_edge_detect_frag.glsl");
+
+	return s_shader;
+}
+
 GLuint GLUtils::bufferMeshData(const std::vector<VertexFormat>& vertices, const std::vector<GLuint>& indices)
 {
 	GLuint VAO;

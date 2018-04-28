@@ -17,6 +17,7 @@
 #include "Shader.h"
 
 #include <fstream>
+#include <assert.h>
 
 std::string readShaderFileFromResource(const char* pFileName);
 GLuint compileVertexShader(const char* shaderCode);
@@ -37,7 +38,7 @@ std::string readShaderFileFromResource(const char* pFileName) {
 		f.close();
 	}
 	catch (std::ifstream::failure e) {
-		std::cerr << "Exception opening/reading/closing file\n";
+		g_log << "Exception opening/reading/closing file\n";
 	}
 	return outFile;
 }
@@ -54,6 +55,7 @@ GLuint compileShader(GLenum ShaderType, const char* shaderCode) {
 	const  GLuint shaderObjectId = glCreateShader(ShaderType);
 	if (shaderObjectId == 0) {
 		g_log << "Error creating shader type " << ShaderType << "\n";
+		assert(false);
 		exit(0);
 	}
 	const GLchar* p[1];
@@ -69,6 +71,7 @@ GLuint compileShader(GLenum ShaderType, const char* shaderCode) {
 		GLchar InfoLog[1024];
 		glGetShaderInfoLog(shaderObjectId, 1024, NULL, InfoLog);
 		g_log << "Error compiling shader type" << ShaderType << "\n" << InfoLog << "\n";
+		assert(false);
 		exit(1);
 	}
 
@@ -82,6 +85,7 @@ GLuint linkProgram(GLuint vertexShaderId, GLuint fragmentShaderId) {
 
 	if (programObjectId == 0) {
 		g_log << "Error creating shader program \n";
+		assert(false);
 		exit(1);
 	}
 
@@ -93,6 +97,7 @@ GLuint linkProgram(GLuint vertexShaderId, GLuint fragmentShaderId) {
 	if (linkStatus == 0) {
 		glGetProgramInfoLog(programObjectId, sizeof(ErrorLog), NULL, ErrorLog);
 		g_log << "Error linking shader program: \n" << ErrorLog << "\n";
+		assert(false);
 		exit(1);
 	}
 	return programObjectId;
@@ -106,6 +111,7 @@ GLint validateProgram(GLuint programObjectId) {
 	if (!Success) {
 		glGetProgramInfoLog(programObjectId, sizeof(ErrorLog), NULL, ErrorLog);
 		g_log << "Invalid shader program: \n" << ErrorLog;
+		assert(false);
 		exit(1);
 	}
 	return Success;

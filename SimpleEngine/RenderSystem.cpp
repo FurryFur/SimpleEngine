@@ -23,6 +23,9 @@
 #include "PrimitivePrefabs.h"
 #include "ModelUtils.h"
 #include "Game.h"
+#include "RenderBuffer.h"
+#include "FrameBuffer.h"
+#include "GLPrimitives.h"
 
 #include <glad\glad.h>
 #include <GLFW\glfw3.h>
@@ -46,6 +49,27 @@ RenderSystem::RenderSystem(Scene& scene)
 	m_renderState.hasIrradianceMap = false;
 	m_renderState.hasRadianceMap = false;
 
+	m_renderState.postProcessShader = GLUtils::getPPEdgeDetectShader();
+
+	// Scene framebuffer
+	FrameBuffer& framebuffer = m_renderState.sceneFramebuffer;
+	glGenFramebuffers(1, &framebuffer.id);
+	glBindFramebuffer(framebuffer.target, framebuffer.id);
+
+	// Scene Color buffer
+	int windowWidth, windowHeight;
+	glfwGetFramebufferSize(m_renderState.glContext, &windowWidth, &windowHeight);
+	Texture& colorBuffer = m_renderState.sceneColorBuffer = Texture::Texture2D(windowWidth, windowHeight);
+	glFramebufferTexture2D(framebuffer.target, GL_COLOR_ATTACHMENT0, colorBuffer.target, colorBuffer.id, 0);
+
+	// Scene Depth and Stencil buffers
+	m_renderState.sceneDepthStencilBuffer = RenderBuffer(GL_DEPTH24_STENCIL8, windowWidth, windowHeight);
+	RenderBuffer& depthStencilBuffer = m_renderState.sceneDepthStencilBuffer;
+	glFramebufferRenderbuffer(framebuffer.target, GL_DEPTH_STENCIL_ATTACHMENT, depthStencilBuffer.target, depthStencilBuffer.id);
+
+	assert(glCheckFramebufferStatus(framebuffer.target) == GL_FRAMEBUFFER_COMPLETE);
+	glBindFramebuffer(framebuffer.target, 0);
+
 	// Create buffer for uniformBlock
 	glGenBuffers(1, &m_renderState.uboUniforms);
 	glBindBufferBase(GL_UNIFORM_BUFFER, m_renderState.uniformBindingPoint, m_renderState.uboUniforms);
@@ -56,6 +80,7 @@ RenderSystem::RenderSystem(Scene& scene)
 
 RenderSystem::~RenderSystem()
 {
+	glDeleteFramebuffers(1, &m_renderState.sceneFramebuffer.id);
 }
 
 void RenderSystem::drawDebugArrow(const glm::vec3& base, const glm::vec3& tip,
@@ -101,12 +126,32 @@ void RenderSystem::drawDebugArrow(const glm::vec3& base, const glm::vec3& _direc
 
 void RenderSystem::beginFrame()
 {
+	glBindFramebuffer(m_renderState.sceneFramebuffer.target, m_renderState.sceneFramebuffer.id);
+
 	glDepthMask(GL_TRUE);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void RenderSystem::endFrame()
 {
+	// Bind and clear the default framebuffer
+	glBindFramebuffer(m_renderState.sceneFramebuffer.target, 0);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	// Render full screen quad with post process shader
+	m_renderState.postProcessShader.use();
+	glDisable(GL_DEPTH_TEST);
+	const Mesh& quadMesh = GLPrimitives::getQuadMesh();
+	glBindVertexArray(quadMesh.VAO);
+	glActiveTexture(GL_TEXTURE0);
+	glUniform1i(m_renderState.postProcessShader.getUniformLocation("sceneSampler"), 0);
+	glBindTexture(m_renderState.sceneColorBuffer.target, m_renderState.sceneColorBuffer.id);
+	glDrawElements(GL_TRIANGLES, quadMesh.numIndices, GL_UNSIGNED_INT, 0);
+
+	glEnable(GL_DEPTH_TEST);
+	glBindVertexArray(0);
+	glBindTexture(m_renderState.sceneColorBuffer.target, 0);
+
 	glfwSwapBuffers(m_renderState.glContext);
 }
 
@@ -132,8 +177,7 @@ void RenderSystem::update(Entity& entity)
 	// Swap the current global render state with this RenderSystems state.
 	s_renderState = m_renderState;
 
-	// Render the 
-
+	// Render the current entities model
 	renderModel(entity.model, GLMUtils::transformToMat(entity.transform));
 }
 

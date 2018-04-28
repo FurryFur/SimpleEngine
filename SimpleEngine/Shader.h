@@ -8,6 +8,7 @@
 class Shader
 {
 public:
+	Shader() = default;
 	Shader(GLuint gpuProgramHandle);
 	~Shader();
 

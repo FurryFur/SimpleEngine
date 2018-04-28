@@ -169,6 +169,7 @@ xcopy "$(ProjectDir)ext\assimp\lib_64\assimp-vc140-mt.dll" "$(OutDir)" /dsy</Com
     <ClCompile Include="Clock.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="ext\glad\src\glad.c" />
+    <ClCompile Include="FrameBuffer.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameplayScreen.cpp" />
     <ClCompile Include="GLPrimitives.cpp" />
@@ -179,6 +180,8 @@ xcopy "$(ProjectDir)ext\assimp\lib_64\assimp-vc140-mt.dll" "$(OutDir)" /dsy</Com
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ModelUtils.cpp" />
     <ClCompile Include="PhysicsSystem.cpp" />
+    <ClCompile Include="RenderBuffer.cpp" />
+    <ClCompile Include="Texture.cpp" />
     <ClCompile Include="VehicleMovementSystem.cpp" />
     <ClCompile Include="PickupSystem.cpp" />
     <ClCompile Include="RenderSystem.cpp" />
@@ -204,6 +207,7 @@ xcopy "$(ProjectDir)ext\assimp\lib_64\assimp-vc140-mt.dll" "$(OutDir)" /dsy</Com
     <ClInclude Include="Clock.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="EntityEventListener.h" />
+    <ClInclude Include="FrameBuffer.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameplayScreen.h" />
     <ClInclude Include="LevelLoader.h" />
@@ -221,6 +225,7 @@ xcopy "$(ProjectDir)ext\assimp\lib_64\assimp-vc140-mt.dll" "$(OutDir)" /dsy</Com
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="ModelUtils.h" />
     <ClInclude Include="PhysicsComponent.h" />
+    <ClInclude Include="RenderBuffer.h" />
     <ClInclude Include="VehicleMovementComponent.h" />
     <ClInclude Include="VehicleMovementSystem.h" />
     <ClInclude Include="PickupComponent.h" />
@@ -249,6 +254,9 @@ xcopy "$(ProjectDir)ext\assimp\lib_64\assimp-vc140-mt.dll" "$(OutDir)" /dsy</Com
     <None Include="Assets\Shaders\debug_frag.glsl" />
     <None Include="Assets\Shaders\default_frag.glsl" />
     <None Include="Assets\Shaders\default_vert.glsl" />
+    <None Include="Assets\Shaders\fullscreen_quad_frag.glsl" />
+    <None Include="Assets\Shaders\pp_edge_detect_frag.glsl" />
+    <None Include="Assets\Shaders\fullscreen_quad_vert.glsl" />
     <None Include="Assets\Shaders\metal_frag.glsl" />
     <None Include="Assets\Shaders\skybox_frag.glsl" />
     <None Include="Assets\Shaders\skybox_vert.glsl" />
