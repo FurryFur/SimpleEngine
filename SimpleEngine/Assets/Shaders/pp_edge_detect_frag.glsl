@@ -27,7 +27,7 @@ const ivec2 offsets[9] = ivec2[](
     ivec2( 1,  0), // center-right
     ivec2(-1, -1), // bottom-left
     ivec2( 0, -1), // bottom-center
-    ivec2( 1, -1)  // bottom-right    
+    ivec2( 1, -1)  // bottom-right
 );
 
 void main()
@@ -49,4 +49,4 @@ void main()
 	vec3 grad = sqrt(gradX * gradX + gradY * gradY);
     
     outColor = vec4(grad, 1.0);
-}  
+}
