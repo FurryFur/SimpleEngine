@@ -248,25 +248,25 @@ namespace Prefabs {
 
 		// Fill model component with mesh data
 		terrain.model.rootNode.meshIDs.push_back(0);
-		//terrain.model.rootNode.meshIDs.push_back(1);
+		terrain.model.rootNode.meshIDs.push_back(1);
 		terrain.model.meshes.push_back(mesh);
-		//terrain.model.meshes.push_back(mesh);
-		//terrain.model.meshes[1].materialIndex = 1;
+		terrain.model.meshes.push_back(mesh);
+		terrain.model.meshes[1].materialIndex = 1;
 
 		// Create terrain material component
-		//Material terrainMaterial;
-		//terrainMaterial.shader = &GLUtils::getDefaultShader();
-		//terrainMaterial.colorMaps.push_back(GLUtils::loadTexture("Assets/Textures/dessert-floor.png"));
-		//terrainMaterial.willDrawDepth = true;
-		//terrainMaterial.shaderParams.metallicness = 0;
-		//terrainMaterial.shaderParams.glossiness = 0;
-		//terrainMaterial.shaderParams.specBias = 0;
-		//terrain.model.materials.push_back(std::move(terrainMaterial));
+		Material terrainMaterial;
+		terrainMaterial.shader = &GLUtils::getDefaultShader();
+		terrainMaterial.colorMaps.push_back(GLUtils::loadTexture("Assets/Textures/dessert-floor.png"));
+		terrainMaterial.willDrawDepth = true;
+		terrainMaterial.shaderParams.metallicness = 0;
+		terrainMaterial.shaderParams.glossiness = 0;
+		terrainMaterial.shaderParams.specBias = 0;
+		terrain.model.materials.push_back(std::move(terrainMaterial));
 
 		// Create grass material component
 		Material grassMaterial;
 		grassMaterial.shader = &GLUtils::getTerrainGrassGeoShader();
-		grassMaterial.colorMaps.push_back(GLUtils::loadTexture("Assets/Textures/dessert-floor.png"));
+		grassMaterial.colorMaps.push_back(GLUtils::loadTexture("Assets/Textures/random-texture.png"));
 		grassMaterial.willDrawDepth = true;
 		grassMaterial.shaderParams.metallicness = 0;
 		grassMaterial.shaderParams.glossiness = 0;

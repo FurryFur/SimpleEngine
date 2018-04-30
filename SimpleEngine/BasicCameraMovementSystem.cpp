@@ -96,7 +96,7 @@ void BasicCameraMovementSystem::setCameraToControl(Entity* entity)
 	if (m_cameraToControl) {
 		if (!m_cameraToControl->hasComponents(COMPONENT_BASIC_CAMERA_MOVEMENT)) {
 			m_cameraToControl->addComponents(COMPONENT_BASIC_CAMERA_MOVEMENT);
-			m_cameraToControl->basicCameraMovement.moveSpeed = 0.5f;
+			m_cameraToControl->basicCameraMovement.moveSpeed = 0.1f;
 			m_cameraToControl->basicCameraMovement.orientationSensitivity = 0.01f;
 		}
 		if (!m_cameraToControl->hasComponents(COMPONENT_INPUT_MAP))
