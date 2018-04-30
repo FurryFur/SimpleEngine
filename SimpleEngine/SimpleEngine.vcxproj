@@ -255,6 +255,7 @@ xcopy "$(ProjectDir)ext\assimp\lib_64\assimp-vc140-mt.dll" "$(OutDir)" /dsy</Com
     <None Include="Assets\Shaders\default_frag.glsl" />
     <None Include="Assets\Shaders\default_vert.glsl" />
     <None Include="Assets\Shaders\fullscreen_quad_frag.glsl" />
+    <None Include="Assets\Shaders\grass_geo.glsl" />
     <None Include="Assets\Shaders\pp_edge_detect_frag.glsl" />
     <None Include="Assets\Shaders\fullscreen_quad_vert.glsl" />
     <None Include="Assets\Shaders\metal_frag.glsl" />

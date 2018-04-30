@@ -23,7 +23,7 @@ struct RenderState {
 	FrameBuffer sceneFramebuffer;
 	Texture sceneColorBuffer;
 	RenderBuffer sceneDepthStencilBuffer;
-	Shader postProcessShader;
+	const Shader* postProcessShader;
 	GLuint uniformBindingPoint;
 	std::vector<const Entity*> spotlights;
 };

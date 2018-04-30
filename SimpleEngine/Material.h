@@ -25,7 +25,7 @@
 #include <string>
 
 struct Material {
-	Shader* shader;
+	const Shader* shader;
 	ShaderParams shaderParams;
 	std::vector<Texture> colorMaps;
 	std::vector<Texture> metallicnessMaps;

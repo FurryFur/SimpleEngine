@@ -49,7 +49,8 @@ RenderSystem::RenderSystem(Scene& scene)
 	m_renderState.hasIrradianceMap = false;
 	m_renderState.hasRadianceMap = false;
 
-	m_renderState.postProcessShader = GLUtils::getPPEdgeDetectShader();
+	// Set post processing shader
+	m_renderState.postProcessShader = &GLUtils::getFullscreenQuadShader();
 
 	// Scene framebuffer
 	FrameBuffer& framebuffer = m_renderState.sceneFramebuffer;
@@ -139,12 +140,12 @@ void RenderSystem::endFrame()
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	// Render full screen quad with post process shader
-	m_renderState.postProcessShader.use();
+	m_renderState.postProcessShader->use();
 	glDisable(GL_DEPTH_TEST);
 	const Mesh& quadMesh = GLPrimitives::getQuadMesh();
 	glBindVertexArray(quadMesh.VAO);
 	glActiveTexture(GL_TEXTURE0);
-	glUniform1i(m_renderState.postProcessShader.getUniformLocation("sceneSampler"), 0);
+	glUniform1i(m_renderState.postProcessShader->getUniformLocation("sceneSampler"), 0);
 	glBindTexture(m_renderState.sceneColorBuffer.target, m_renderState.sceneColorBuffer.id);
 	glDrawElements(GL_TRIANGLES, quadMesh.numIndices, GL_UNSIGNED_INT, 0);
 

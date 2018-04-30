@@ -33,30 +33,33 @@ namespace GLUtils {
 
 	// Returns a handler to the default shader.
 	// This function will build the shader if it is not already built.
-	Shader& getDefaultShader();
+	const Shader& getDefaultShader();
 
 	// Returns a handler to a shader that can take a metallicness map.
 	// This function will build the shader if it is not already built.
-	Shader& getMetalShader();
+	const Shader& getMetalShader();
 
 	// Returns a handler to the debug shader.
 	// This shader can draw meshes with a solid color.
 	// Change the materials debug color property to set which color to use.
 	// This function will build the shader if it is not already built.
-	Shader& getDebugShader();
+	const Shader& getDebugShader();
 
 	// Returns a handler to the skybox shader.
 	// This function will build the sahder if it is not already built.
-	Shader& getSkyboxShader();
+	const Shader& getSkyboxShader();
 
 	// Retuns a shader designed to render a full screen quad using 
 	// the currently bound texture.
-	Shader& getFullscreenQuadShader();
+	const Shader& getFullscreenQuadShader();
 
 	// Retuns an edge detection post processing shader.
 	// This should be applied to a full screen quad with scene color buffer bound
 	// in texture unit 0.
-	Shader& getPPEdgeDetectShader();
+	const Shader& getPPEdgeDetectShader();
+
+	// Retures a shader used to 
+	const Shader& getTerrainGrassGeoShader();
 
 	// Buffers vertex and index data to the GPU.
 	// Returns a handler the the VAO associated with the vertices / indices.

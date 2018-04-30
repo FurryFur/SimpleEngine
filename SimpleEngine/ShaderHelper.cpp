@@ -51,6 +51,10 @@ GLuint compileFragmentShader(const char* shaderCode) {
 	return compileShader(GL_FRAGMENT_SHADER, shaderCode);
 }
 
+GLuint compileGeometryShader(const char* shaderCode) {
+	return compileShader(GL_GEOMETRY_SHADER, shaderCode);
+}
+
 GLuint compileShader(GLenum ShaderType, const char* shaderCode) {
 	const  GLuint shaderObjectId = glCreateShader(ShaderType);
 	if (shaderObjectId == 0) {
@@ -78,7 +82,7 @@ GLuint compileShader(GLenum ShaderType, const char* shaderCode) {
 	return shaderObjectId;
 }
 
-GLuint linkProgram(GLuint vertexShaderId, GLuint fragmentShaderId) {
+GLuint linkProgram(GLuint vertexShaderId, GLuint fragmentShaderId, bool haveGeometryShader, GLuint geometryShaderId) {
 	GLint linkStatus = 0;
 	GLchar ErrorLog[1024] = { 0 };
 	const GLuint programObjectId = glCreateProgram();
@@ -90,6 +94,8 @@ GLuint linkProgram(GLuint vertexShaderId, GLuint fragmentShaderId) {
 	}
 
 	glAttachShader(programObjectId, vertexShaderId);
+	if (haveGeometryShader);
+		glAttachShader(programObjectId, geometryShaderId);
 	glAttachShader(programObjectId, fragmentShaderId);
 	glLinkProgram(programObjectId);
 
@@ -101,6 +107,14 @@ GLuint linkProgram(GLuint vertexShaderId, GLuint fragmentShaderId) {
 		exit(1);
 	}
 	return programObjectId;
+}
+
+GLuint linkProgram(GLuint vertexShaderId, GLuint fragmentShaderId) {
+	return linkProgram(vertexShaderId, fragmentShaderId, false, 0);
+}
+
+GLuint linkProgram(GLuint vertexShaderId, GLuint geometryShaderId, GLuint fragmentShaderId) {
+	return linkProgram(vertexShaderId, fragmentShaderId, true, geometryShaderId);
 }
 
 GLint validateProgram(GLuint programObjectId) {
@@ -117,12 +131,23 @@ GLint validateProgram(GLuint programObjectId) {
 	return Success;
 }
 
-Shader compileAndLinkShaders(std::string vertex_shader, std::string fragment_shader) {
-	std::string vertexShaderSource = readShaderFileFromResource(vertex_shader.c_str());
-	std::string fragmentShaderSource = readShaderFileFromResource(fragment_shader.c_str());
+Shader compileAndLinkShaders(const char* vertexShaderFile, const char* fragmentShaderFile, const char* geometryShaderFile) {
+	std::string vertexShaderSource = readShaderFileFromResource(vertexShaderFile);
+	std::string fragmentShaderSource = readShaderFileFromResource(fragmentShaderFile);
 	GLuint vertexShader = compileVertexShader(vertexShaderSource.c_str());
 	GLuint fragmentShader = compileFragmentShader(fragmentShaderSource.c_str());
-	GLuint program = linkProgram(vertexShader, fragmentShader);
+
+	GLuint program;
+	if (geometryShaderFile) {
+		std::string geometryShaderSource = readShaderFileFromResource(geometryShaderFile);
+		GLuint geometryShader = compileGeometryShader(geometryShaderSource.c_str());
+		program = linkProgram(vertexShader, geometryShader, fragmentShader);
+		glDeleteShader(geometryShader);
+	}
+	else {
+		program = linkProgram(vertexShader, fragmentShader);
+	}
+	
 	//validateProgram(program);
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);

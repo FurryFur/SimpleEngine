@@ -88,7 +88,7 @@ GLFWwindow* GLUtils::initOpenGL()
 	return glContext;
 }
 
-Shader& GLUtils::getDefaultShader()
+const Shader& GLUtils::getDefaultShader()
 {
 	static Shader s_shader = compileAndLinkShaders(
 		"Assets/Shaders/default_vert.glsl",
@@ -97,7 +97,7 @@ Shader& GLUtils::getDefaultShader()
 	return s_shader;
 }
 
-Shader& GLUtils::getMetalShader()
+const Shader& GLUtils::getMetalShader()
 {
 	static Shader s_shader = compileAndLinkShaders(
 		"Assets/Shaders/default_vert.glsl",
@@ -106,7 +106,7 @@ Shader& GLUtils::getMetalShader()
 	return s_shader;
 }
 
-Shader& GLUtils::getDebugShader()
+const Shader& GLUtils::getDebugShader()
 {
 	static Shader s_shader = compileAndLinkShaders(
 		"Assets/Shaders/default_vert.glsl",
@@ -115,7 +115,7 @@ Shader& GLUtils::getDebugShader()
 	return s_shader;
 }
 
-Shader& GLUtils::getSkyboxShader()
+const Shader& GLUtils::getSkyboxShader()
 {
 	static Shader s_shader = compileAndLinkShaders(
 		"Assets/Shaders/skybox_vert.glsl",
@@ -124,7 +124,7 @@ Shader& GLUtils::getSkyboxShader()
 	return s_shader;
 }
 
-Shader& GLUtils::getFullscreenQuadShader()
+const Shader& GLUtils::getFullscreenQuadShader()
 {
 	static Shader s_shader = compileAndLinkShaders(
 		"Assets/Shaders/fullscreen_quad_vert.glsl",
@@ -133,11 +133,21 @@ Shader& GLUtils::getFullscreenQuadShader()
 	return s_shader;
 }
 
-Shader& GLUtils::getPPEdgeDetectShader()
+const Shader& GLUtils::getPPEdgeDetectShader()
 {
 	static Shader s_shader = compileAndLinkShaders(
 		"Assets/Shaders/fullscreen_quad_vert.glsl",
 		"Assets/Shaders/pp_edge_detect_frag.glsl");
+
+	return s_shader;
+}
+
+const Shader& GLUtils::getTerrainGrassGeoShader()
+{
+	static Shader s_shader = compileAndLinkShaders(
+		"Assets/Shaders/default_vert.glsl",
+		"Assets/Shaders/default_frag.glsl",
+		"Assets/Shaders/grass_geo.glsl");
 
 	return s_shader;
 }
