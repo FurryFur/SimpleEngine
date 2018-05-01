@@ -308,6 +308,11 @@ void RenderSystem::renderModel(const ModelComponent& model, const glm::mat4& tra
 
 		// Render the mesh
 		glBindVertexArray(mesh.VAO);
-		glDrawElements(GL_TRIANGLES, mesh.numIndices, GL_UNSIGNED_INT, 0);
+		if (material.shader->hasTessellationStage()) {
+			glPatchParameteri(GL_PATCH_VERTICES, 3);
+			glDrawElements(GL_PATCHES, mesh.numIndices, GL_UNSIGNED_INT, 0);
+		}
+		else
+			glDrawElements(GL_TRIANGLES, mesh.numIndices, GL_UNSIGNED_INT, 0);
 	}
 }

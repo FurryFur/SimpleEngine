@@ -286,7 +286,7 @@ namespace Prefabs {
 
 		// Create terrain material component
 		Material terrainMaterial;
-		terrainMaterial.shader = &GLUtils::getDefaultShader();
+		terrainMaterial.shader = &GLUtils::getTerrainShader();
 		terrainMaterial.colorMaps.push_back(GLUtils::loadTexture("Assets/Textures/dessert-floor.png"));
 		terrainMaterial.willDrawDepth = true;
 		terrainMaterial.shaderParams.metallicness = 0;

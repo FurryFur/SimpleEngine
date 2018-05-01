@@ -58,8 +58,11 @@ namespace GLUtils {
 	// in texture unit 0.
 	const Shader& getPPEdgeDetectShader();
 
-	// Retures a shader used to 
+	// Retures a shader used to generate grass from a terrain mesh.
 	const Shader& getTerrainGrassGeoShader();
+
+	// Returns a shader used to render tessellated heightmapped terrain.
+	const Shader& getTerrainShader();
 
 	// Buffers vertex and index data to the GPU.
 	// Returns a handler the the VAO associated with the vertices / indices.

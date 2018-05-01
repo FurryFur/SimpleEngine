@@ -145,11 +145,22 @@ const Shader& GLUtils::getPPEdgeDetectShader()
 const Shader& GLUtils::getTerrainGrassGeoShader()
 {
 	static Shader s_shader = compileAndLinkShaders(
-		"Assets/Shaders/default_vert.glsl",
+		"Assets/Shaders/terrain_vert.glsl",
 		"Assets/Shaders/grass_frag.glsl",
-		nullptr,
-		nullptr,
+		"Assets/Shaders/terrain_tess_ctrl.glsl",
+		"Assets/SHaders/terrain_tess_eval.glsl",
 		"Assets/Shaders/grass_geo.glsl");
+
+	return s_shader;
+}
+
+const Shader& GLUtils::getTerrainShader()
+{
+	static Shader s_shader = compileAndLinkShaders(
+		"Assets/Shaders/terrain_vert.glsl",
+		"Assets/Shaders/default_frag.glsl",
+		"Assets/Shaders/terrain_tess_ctrl.glsl",
+		"Assets/SHaders/terrain_tess_eval.glsl");
 
 	return s_shader;
 }
