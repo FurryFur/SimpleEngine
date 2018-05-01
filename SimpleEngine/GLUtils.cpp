@@ -147,6 +147,8 @@ const Shader& GLUtils::getTerrainGrassGeoShader()
 	static Shader s_shader = compileAndLinkShaders(
 		"Assets/Shaders/default_vert.glsl",
 		"Assets/Shaders/grass_frag.glsl",
+		nullptr,
+		nullptr,
 		"Assets/Shaders/grass_geo.glsl");
 
 	return s_shader;

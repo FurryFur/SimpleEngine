@@ -18,18 +18,12 @@
 
 #include <fstream>
 #include <assert.h>
+#include <vector>
 
-std::string readShaderFileFromResource(const char* pFileName);
-GLuint compileVertexShader(const char* shaderCode);
-GLuint compileFragmentShader(const char* shaderCode);
-GLuint compileShader(GLenum ShaderType, const char* shaderCode);
-GLuint linkProgram(GLuint vertexShaderId, GLuint fragmentShaderId);
-GLint validateProgram(GLuint programObjectId);
-
-std::string readShaderFileFromResource(const char* pFileName) {
+std::string readShaderFileFromResource(const std::string& fileName) {
 	std::string outFile;
 	try {
-		std::ifstream f(pFileName);
+		std::ifstream f(fileName);
 		std::string line;
 		while (std::getline(f, line)) {
 			outFile.append(line);
@@ -43,19 +37,7 @@ std::string readShaderFileFromResource(const char* pFileName) {
 	return outFile;
 }
 
-GLuint compileVertexShader(const char* shaderCode) {
-	return compileShader(GL_VERTEX_SHADER, shaderCode);
-}
-
-GLuint compileFragmentShader(const char* shaderCode) {
-	return compileShader(GL_FRAGMENT_SHADER, shaderCode);
-}
-
-GLuint compileGeometryShader(const char* shaderCode) {
-	return compileShader(GL_GEOMETRY_SHADER, shaderCode);
-}
-
-GLuint compileShader(GLenum ShaderType, const char* shaderCode) {
+GLuint compileShader(GLenum ShaderType, const std::string& shaderCode) {
 	const  GLuint shaderObjectId = glCreateShader(ShaderType);
 	if (shaderObjectId == 0) {
 		g_log << "Error creating shader type " << ShaderType << "\n";
@@ -63,9 +45,9 @@ GLuint compileShader(GLenum ShaderType, const char* shaderCode) {
 		exit(0);
 	}
 	const GLchar* p[1];
-	p[0] = shaderCode;
+	p[0] = shaderCode.c_str();
 	GLint Lengths[1];
-	Lengths[0] = static_cast<GLint>(strlen(shaderCode));
+	Lengths[0] = static_cast<GLint>(strlen(shaderCode.c_str()));
 
 	glShaderSource(shaderObjectId, 1, p, Lengths);
 	glCompileShader(shaderObjectId);
@@ -82,7 +64,7 @@ GLuint compileShader(GLenum ShaderType, const char* shaderCode) {
 	return shaderObjectId;
 }
 
-GLuint linkProgram(GLuint vertexShaderId, GLuint fragmentShaderId, bool haveGeometryShader, GLuint geometryShaderId) {
+GLuint linkProgram(const std::vector<GLuint>& shadersToLink) {
 	GLint linkStatus = 0;
 	GLchar ErrorLog[1024] = { 0 };
 	const GLuint programObjectId = glCreateProgram();
@@ -93,10 +75,8 @@ GLuint linkProgram(GLuint vertexShaderId, GLuint fragmentShaderId, bool haveGeom
 		exit(1);
 	}
 
-	glAttachShader(programObjectId, vertexShaderId);
-	if (haveGeometryShader);
-		glAttachShader(programObjectId, geometryShaderId);
-	glAttachShader(programObjectId, fragmentShaderId);
+	for (GLuint shaderId : shadersToLink)
+		glAttachShader(programObjectId, shaderId);
 	glLinkProgram(programObjectId);
 
 	glGetProgramiv(programObjectId, GL_LINK_STATUS, &linkStatus);
@@ -107,14 +87,6 @@ GLuint linkProgram(GLuint vertexShaderId, GLuint fragmentShaderId, bool haveGeom
 		exit(1);
 	}
 	return programObjectId;
-}
-
-GLuint linkProgram(GLuint vertexShaderId, GLuint fragmentShaderId) {
-	return linkProgram(vertexShaderId, fragmentShaderId, false, 0);
-}
-
-GLuint linkProgram(GLuint vertexShaderId, GLuint geometryShaderId, GLuint fragmentShaderId) {
-	return linkProgram(vertexShaderId, fragmentShaderId, true, geometryShaderId);
 }
 
 GLint validateProgram(GLuint programObjectId) {
@@ -131,26 +103,37 @@ GLint validateProgram(GLuint programObjectId) {
 	return Success;
 }
 
-Shader compileAndLinkShaders(const char* vertexShaderFile, const char* fragmentShaderFile, const char* geometryShaderFile) {
+Shader compileAndLinkShaders(const std::string& vertexShaderFile, const std::string& fragmentShaderFile,
+                             const char* tessCtrlShaderFile, const char* tessEvalShaderFile, const char* geometryShaderFile) {
 	std::string vertexShaderSource = readShaderFileFromResource(vertexShaderFile);
 	std::string fragmentShaderSource = readShaderFileFromResource(fragmentShaderFile);
-	GLuint vertexShader = compileVertexShader(vertexShaderSource.c_str());
-	GLuint fragmentShader = compileFragmentShader(fragmentShaderSource.c_str());
 
-	GLuint program;
+	std::vector<GLuint> shadersToLink;
+	shadersToLink.push_back(compileShader(GL_VERTEX_SHADER, vertexShaderSource));
+	shadersToLink.push_back(compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource));
+
+	if (tessCtrlShaderFile) {
+		std::string tessellationShaderSource = readShaderFileFromResource(tessCtrlShaderFile);
+		shadersToLink.push_back(compileShader(GL_TESS_CONTROL_SHADER, tessellationShaderSource));
+	}
+
+	if (tessEvalShaderFile) {
+		std::string tessellationShaderSource = readShaderFileFromResource(tessEvalShaderFile);
+		shadersToLink.push_back(compileShader(GL_TESS_EVALUATION_SHADER, tessellationShaderSource));
+	}
+
 	if (geometryShaderFile) {
 		std::string geometryShaderSource = readShaderFileFromResource(geometryShaderFile);
-		GLuint geometryShader = compileGeometryShader(geometryShaderSource.c_str());
-		program = linkProgram(vertexShader, geometryShader, fragmentShader);
-		glDeleteShader(geometryShader);
-	}
-	else {
-		program = linkProgram(vertexShader, fragmentShader);
+		shadersToLink.push_back(compileShader(GL_GEOMETRY_SHADER, geometryShaderSource));
 	}
 	
-	//validateProgram(program);
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
+	GLuint program = linkProgram(shadersToLink);
+	
+	for (GLuint shaderId : shadersToLink)
+		glDeleteShader(shaderId);
 
-	return Shader{ program };
+	if (tessCtrlShaderFile || tessEvalShaderFile)
+		return Shader(program, true);
+	else
+		return Shader(program, false);
 }

@@ -43,7 +43,8 @@ GameplayScreen::GameplayScreen()
 	renderSystem->setCamera(&cameraEntity);
 	basicCameraMovementSystem->setCameraToControl(&cameraEntity);
 
-	Prefabs::createTerrain(m_scene, "Assets/Textures/Heightmaps/heightmap_2.png", 100, 100);
+	//Prefabs::createTerrain(m_scene, "Assets/Textures/Heightmaps/heightmap_2.png", 100, 100);
+	Prefabs::createTessTerrain(m_scene, "Assets/Textures/Heightmaps/heightmap_2.png", 1000);
 
 	Entity& reflectiveSphere = Prefabs::createSphere(m_scene);
 	reflectiveSphere.transform.position += glm::vec3(0, 50, 0);

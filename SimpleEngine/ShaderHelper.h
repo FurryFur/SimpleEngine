@@ -30,6 +30,8 @@ GLint validateProgram(GLuint programObjectId);
 // vertex_shader is the file path to the vertex_shader code.
 // fragment_shader is the file path to the fragment_shader code.
 // program is returned by reference into last parameter.
-Shader compileAndLinkShaders(const char* vertexShaderFile, const char* fragmentShaderFile, const char* geometryShaderFile = nullptr);
+Shader compileAndLinkShaders(const std::string& vertexShaderFile, const std::string& fragmentShaderFile, 
+                             const char* tessCtrlShaderFile = nullptr, const char* tessEvalShaderFile = nullptr,
+                             const char* geometryShaderFile = nullptr);
 
 #endif

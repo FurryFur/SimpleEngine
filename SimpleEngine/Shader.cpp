@@ -4,8 +4,9 @@
 
 #include <string>
 
-Shader::Shader(GLuint gpuProgramHandle)
+Shader::Shader(GLuint gpuProgramHandle, bool hasTessellationStage)
 	: m_gpuHandle{ gpuProgramHandle }
+	, m_hasTessellationStage{ hasTessellationStage }
 {
 }
 
@@ -44,4 +45,9 @@ GLuint Shader::getUniformBlockIndex(const std::string& uniformBlockName) const
 	auto location = glGetUniformBlockIndex(m_gpuHandle, uniformBlockName.c_str());
 	m_uniformBlockIndexCache[uniformBlockName] = location;
 	return location;
+}
+
+bool Shader::hasTessellationStage() const
+{
+	return m_hasTessellationStage;
 }

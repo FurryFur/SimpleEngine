@@ -8,8 +8,7 @@
 class Shader
 {
 public:
-	Shader() = default;
-	Shader(GLuint gpuProgramHandle);
+	Shader(GLuint gpuProgramHandle, bool hasTessellationStage = false);
 	~Shader();
 
 	// Make this shader the current shader for rendering
@@ -24,8 +23,12 @@ public:
 	// Returns a handle to the specified uniform block on the GPU
 	GLuint getUniformBlockIndex(const std::string& uniformBlockName) const;
 
+	// Returns true is this shader includes a tesselation stageW
+	bool hasTessellationStage() const;
+
 private:
 	GLuint m_gpuHandle;
+	bool m_hasTessellationStage;
 	mutable std::unordered_map<std::string, GLint> m_uniformLocationCache;
 	mutable std::unordered_map<std::string, GLuint> m_uniformBlockIndexCache;
 };
