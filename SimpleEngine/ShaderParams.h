@@ -22,4 +22,5 @@ struct ShaderParams {
 	GLfloat metallicness;
 	GLfloat glossiness;
 	GLfloat specBias;
+	bool discardTransparent;
 };

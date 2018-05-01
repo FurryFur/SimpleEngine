@@ -146,7 +146,7 @@ const Shader& GLUtils::getTerrainGrassGeoShader()
 {
 	static Shader s_shader = compileAndLinkShaders(
 		"Assets/Shaders/default_vert.glsl",
-		"Assets/Shaders/default_frag.glsl",
+		"Assets/Shaders/grass_frag.glsl",
 		"Assets/Shaders/grass_geo.glsl");
 
 	return s_shader;
@@ -201,12 +201,19 @@ Texture GLUtils::loadTexture(const std::string& path)
 
 	if (textureData) {
 		GLenum format;
-		if (nrComponents == 1)
+		GLint internalFormat;
+		if (nrComponents == 1) {
 			format = GL_RED;
-		else if (nrComponents == 3)
+			internalFormat = GL_RED;
+		}
+		else if (nrComponents == 3) {
 			format = GL_RGB;
-		else if (nrComponents == 4)
+			internalFormat = GL_SRGB;
+		}
+		else if (nrComponents == 4) {
 			format = GL_RGBA;
+			internalFormat = GL_SRGB_ALPHA;
+		}
 
 		glGenTextures(1, &texture.id);
 		glActiveTexture(GL_TEXTURE0);
@@ -217,7 +224,7 @@ Texture GLUtils::loadTexture(const std::string& path)
 		glTexParameteri(texture.target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glTexParameteri(texture.target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		glTexImage2D(texture.target, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, textureData);
+		glTexImage2D(texture.target, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, textureData);
 		glGenerateMipmap(texture.target);
 
 		glBindTexture(texture.target, 0);
@@ -233,6 +240,7 @@ Texture GLUtils::loadTexture(const std::string& path)
 	return texture;
 }
 
+// TODO: Combine with load textures for easier changability
 Texture GLUtils::loadCubeMapFaces(const std::vector<std::string>& facePaths)
 {
 	// Cached textures that have already been loaded
@@ -263,15 +271,22 @@ Texture GLUtils::loadCubeMapFaces(const std::vector<std::string>& facePaths)
 
 		if (faceData) {
 			GLenum format;
-			if (nrComponents == 1)
+			GLint internalFormat;
+			if (nrComponents == 1) {
 				format = GL_RED;
-			else if (nrComponents == 3)
+				internalFormat = GL_RED;
+			}
+			else if (nrComponents == 3) {
 				format = GL_RGB;
-			else if (nrComponents == 4)
+				internalFormat = GL_SRGB;
+			}
+			else if (nrComponents == 4) {
 				format = GL_RGBA;
+				internalFormat = GL_SRGB_ALPHA;
+			}
 
 			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-				0, format, width, height, 0, format, GL_UNSIGNED_BYTE, faceData);
+				0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, faceData);
 		} else {
 			// TODO: Throw excpetion here
 			g_log << "Texture failed to load at path: " << facePaths.at(i) << "\n";
@@ -304,8 +319,16 @@ Texture GLUtils::loadDDSTexture(const std::string& path)
 	}
 
 	gli::gl GL(gli::gl::PROFILE_GL33);
-	gli::gl::format const format = GL.translate(texture.format(), texture.swizzles());
+	gli::gl::format format = GL.translate(texture.format(), texture.swizzles());
 	GLenum target = GL.translate(texture.target());
+
+	// Slightly hacky fix for sRGB encoded cubemaps
+	if (format.Internal == gli::gl::INTERNAL_RGBA8_UNORM) {
+		format.Internal = gli::gl::INTERNAL_SRGB8_ALPHA8;
+	}
+	if (format.Internal == gli::gl::INTERNAL_RGB8_UNORM) {
+		format.Internal = gli::gl::INTERNAL_SRGB8;
+	}
 
 	GLuint textureName = 0;
 	glGenTextures(1, &textureName);

@@ -18,6 +18,7 @@ layout (std140) uniform UniformBlock {
 	float metallicness;
 	float glossiness;
 	float specBias;
+	bool discardTransparent;
 } u;
 
 uniform samplerCube colorSampler;
@@ -25,4 +26,7 @@ uniform samplerCube colorSampler;
 void main(void)
 {
     outColor = texture(colorSampler, i.textureDir);
+
+	if (u.discardTransparent && outColor.a < 0.5f)
+		discard;
 }

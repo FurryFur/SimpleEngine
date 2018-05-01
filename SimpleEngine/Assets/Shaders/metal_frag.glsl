@@ -21,6 +21,7 @@ layout (std140) uniform UniformBlock {
 	float metallicness;
 	float glossiness;
 	float specBias;
+	bool discardTransparent;
 } u;
 
 uniform sampler2D colorSampler;
@@ -29,7 +30,7 @@ uniform samplerCube radianceSampler;
 uniform samplerCube irradianceSampler;
 
 vec3 lightDir = vec3(1, 1, -1);
-const vec3 LiDirect = vec3(0.64, 0.39, 0.31);
+const vec3 LiDirect = vec3(1.28, 0.78, 0.62);
 const int pmremMipCount = 11;
 const float spotlightCuttoff = 0.5;
 const float spotPow = 4;
@@ -76,7 +77,10 @@ void main(void)
 	else
 		normal = -normalize(i.normal);
 
-	vec3 color = texture(colorSampler, i.texCoord).rgb;
+	vec4 color = texture(colorSampler, i.texCoord);
+
+	if (u.discardTransparent && color.a < 0.5f)
+		discard;
 
 	// Direct Lighting variables
 	vec3 viewDir = normalize(i.viewDir);
@@ -94,8 +98,8 @@ void main(void)
 	vec3 LiIrr = texture(irradianceSampler, normal).rgb;
 
 	vec3 metallicness = clamp(u.metallicness + texture(metallicnessSampler, i.texCoord).rgb, vec3(0, 0, 0), vec3(1, 1, 1));
-	vec3 Cspec = mix(vec3(0.04, 0.04, 0.04) + u.specBias, color, metallicness);
-	vec3 Cdiff = mix(vec3(0, 0, 0), color, 1 - metallicness);
+	vec3 Cspec = mix(vec3(0.04, 0.04, 0.04) + u.specBias, color.rgb, metallicness);
+	vec3 Cdiff = mix(vec3(0, 0, 0), color.rgb, 1 - metallicness);
 	vec3 Fspec = fresnel(Cspec, lightDir, halfVector);
 	vec3 Fdiff = Cdiff * (1 - Fspec) / (1.0000001 - Cspec);
 	vec3 FspecRefl = fresnelWithGloss(Cspec, LiReflDir, normal, u.glossiness);
@@ -111,5 +115,5 @@ void main(void)
 	vec3 LrAmbDiff= LiIrr * FdiffRefl;
 	vec3 LrAmbSpec = LiRefl * FspecRefl;
 
-	outColor = vec4(LrDirect + LrSpotlight + LrAmbDiff + LrAmbSpec, 1);
+	outColor = vec4(LrDirect + LrSpotlight + LrAmbDiff + LrAmbSpec, color.a);
 }

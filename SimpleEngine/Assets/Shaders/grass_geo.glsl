@@ -1,7 +1,7 @@
 #version 420 core
 
 layout (triangles) in;
-layout (triangle_strip, max_vertices = 4) out;
+layout (triangle_strip, max_vertices = 8) out;
 
 layout (std140) uniform UniformBlock {
     mat4 model;
@@ -15,6 +15,7 @@ layout (std140) uniform UniformBlock {
 	float metallicness;
 	float glossiness;
 	float specBias;
+	bool discardTransparent;
 } sh;
 
 in VertexData {
@@ -38,7 +39,6 @@ void main() {
 	}
 	triCenter /= 3;
 
-
 	vec3 u = normalize(gs_in[1].worldPos - gs_in[0].worldPos);
 	vec3 v = gs_in[2].worldPos - gs_in[0].worldPos;
 	vec3 n = normalize(cross(u, v));
@@ -47,43 +47,50 @@ void main() {
 
 	const mat4 vp = sh.projection * sh.view;
 
-	vec3 lowerLeft = triCenter + tangentSpace * vec3(-0.1f, 0, 0);
-	vec3 lowerRight = triCenter + tangentSpace * vec3(0.1f, 0, 0);
-	vec3 upperLeft = triCenter + tangentSpace * vec3(-0.1f, 0.2f, 0);
-	vec3 upperRight = triCenter + tangentSpace * vec3(0.1f, 0.2f, 0);
-	vec3 quadNormal = cross(lowerRight - lowerLeft, upperLeft - lowerLeft);
+	for (int i = 0; i < 2; ++i) {
+		vec3 lowerLeft = triCenter - 0.5f * tangentSpace[0];
+		vec3 lowerRight = triCenter + 0.5f * tangentSpace[0];
+		vec3 upperLeft = triCenter - 0.5f * tangentSpace[0] + vec3(0, 1.0f, 0);
+		vec3 upperRight = triCenter + 0.5f * tangentSpace[0] + vec3(0, 1.0f, 0);
+		vec3 quadNormal = cross(lowerRight - lowerLeft, upperLeft - lowerLeft);
 
-	// Lower Left
-	gs_out.normal = quadNormal;
-	gs_out.texCoord = vec2(0, 0);
-	gs_out.worldPos = lowerLeft;
-	gs_out.viewDir = sh.cameraPos.xyz - gs_out.worldPos;
-	gl_Position = vp * vec4(gs_out.worldPos, 1);
-	EmitVertex();
+		// Lower Left
+		gs_out.normal = quadNormal;
+		gs_out.texCoord = vec2(0, 1);
+		gs_out.worldPos = lowerLeft;
+		gs_out.viewDir = sh.cameraPos.xyz - gs_out.worldPos;
+		gl_Position = vp * vec4(gs_out.worldPos, 1);
+		EmitVertex();
 
-	// Lower Right
-	gs_out.normal = quadNormal;
-	gs_out.texCoord = vec2(1, 0);
-	gs_out.worldPos = lowerRight;
-	gs_out.viewDir = sh.cameraPos.xyz - gs_out.worldPos;
-	gl_Position = vp * vec4(gs_out.worldPos, 1);
-	EmitVertex();
+		// Lower Right
+		gs_out.normal = quadNormal;
+		gs_out.texCoord = vec2(1, 1);
+		gs_out.worldPos = lowerRight;
+		gs_out.viewDir = sh.cameraPos.xyz - gs_out.worldPos;
+		gl_Position = vp * vec4(gs_out.worldPos, 1);
+		EmitVertex();
 
-	// Upper Left
-	gs_out.normal = quadNormal;
-	gs_out.texCoord = vec2(0, 1);
-	gs_out.worldPos = upperLeft;
-	gs_out.viewDir = sh.cameraPos.xyz - gs_out.worldPos;
-	gl_Position = vp * vec4(gs_out.worldPos, 1);
-	EmitVertex();
+		// Upper Left
+		gs_out.normal = quadNormal;
+		gs_out.texCoord = vec2(0, 0);
+		gs_out.worldPos = upperLeft;
+		gs_out.viewDir = sh.cameraPos.xyz - gs_out.worldPos;
+		gl_Position = vp * vec4(gs_out.worldPos, 1);
+		EmitVertex();
 
-	// Upper Right
-	gs_out.normal = quadNormal;
-	gs_out.texCoord = vec2(1, 1);
-	gs_out.worldPos = upperRight;
-	gs_out.viewDir = sh.cameraPos.xyz - gs_out.worldPos;
-	gl_Position = vp * vec4(gs_out.worldPos, 1);
-	EmitVertex();
+		// Upper Right
+		gs_out.normal = quadNormal;
+		gs_out.texCoord = vec2(1, 0);
+		gs_out.worldPos = upperRight;
+		gs_out.viewDir = sh.cameraPos.xyz - gs_out.worldPos;
+		gl_Position = vp * vec4(gs_out.worldPos, 1);
+		EmitVertex();
 
-	EndPrimitive();
+		EndPrimitive();
+
+		// Rotate next quad 90 degrees in tangent space
+		vec3 tmp = tangentSpace[0];
+		tangentSpace[0] = -tangentSpace[2];
+		tangentSpace[1] = tmp;
+	}
 }

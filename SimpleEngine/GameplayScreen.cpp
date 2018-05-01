@@ -33,14 +33,7 @@ GameplayScreen::GameplayScreen()
 		"Assets/Textures/envmap_violentdays/violentdays_bk.tga",
 		"Assets/Textures/envmap_violentdays/violentdays_ft.tga",
 	});
-	Texture irradianceMap = GLUtils::loadCubeMapFaces({
-		"Assets/Textures/envmap_violentdays/violentdays_irr_c00.bmp",
-		"Assets/Textures/envmap_violentdays/violentdays_irr_c01.bmp",
-		"Assets/Textures/envmap_violentdays/violentdays_irr_c02.bmp",
-		"Assets/Textures/envmap_violentdays/violentdays_irr_c03.bmp",
-		"Assets/Textures/envmap_violentdays/violentdays_irr_c04.bmp",
-		"Assets/Textures/envmap_violentdays/violentdays_irr_c05.bmp",
-	});
+	Texture irradianceMap = GLUtils::loadDDSTexture("Assets/Textures/envmap_violentdays/violentdays_iem.dds");
 	Texture radianceMap = GLUtils::loadDDSTexture("Assets/Textures/envmap_violentdays/violentdays_pmrem.dds");
 	renderSystem->setRadianceMap(radianceMap.id);
 	renderSystem->setIrradianceMap(irradianceMap.id);
@@ -51,6 +44,21 @@ GameplayScreen::GameplayScreen()
 	basicCameraMovementSystem->setCameraToControl(&cameraEntity);
 
 	Prefabs::createTerrain(m_scene, "Assets/Textures/Heightmaps/heightmap_2.png", 100, 100);
+
+	Entity& reflectiveSphere = Prefabs::createSphere(m_scene);
+	reflectiveSphere.transform.position += glm::vec3(0, 50, 0);
+	reflectiveSphere.model.materials[0].shader = &GLUtils::getDebugShader();
+	reflectiveSphere.model.materials[0].debugColor = glm::vec3(1, 1, 1);
+	reflectiveSphere.model.materials[0].shaderParams.glossiness = 1.0f;
+	reflectiveSphere.model.materials[0].shaderParams.metallicness = 1.0f;
+
+	Entity& diffuseSphere = Prefabs::createSphere(m_scene);
+	diffuseSphere.transform.position += glm::vec3(10, 50, 0);
+	diffuseSphere.model.materials[0].shader = &GLUtils::getDebugShader();
+	diffuseSphere.model.materials[0].debugColor = glm::vec3(1, 1, 1);
+	diffuseSphere.model.materials[0].shaderParams.glossiness = 0.0f;
+	diffuseSphere.model.materials[0].shaderParams.metallicness = 0.0f;
+	diffuseSphere.model.materials[0].shaderParams.specBias = -0.04f;
 
 	m_activeSystems.push_back(std::move(renderSystem));
 	m_activeSystems.push_back(std::move(basicCameraMovementSystem));

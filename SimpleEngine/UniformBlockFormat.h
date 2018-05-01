@@ -21,6 +21,11 @@
 
 #include <array>
 
+// TODO: Split this up, and make offsets easy to access, so we can easily:
+// buffer constant projection matrix once,
+// View matrix, camera position and lights per frame,
+// and model matrix and shader parameters per object render call.
+// Could also batch render calls based on materials and only buffer separate view matrices per same object render call.
 struct UniformBlockFormat {
 	static const GLuint s_kMaxSpotlights = 8;
 
@@ -35,4 +40,5 @@ struct UniformBlockFormat {
 	GLfloat metallicness;
 	GLfloat glossiness;
 	GLfloat specBias;
+	bool discardTransparent;
 };

@@ -314,6 +314,9 @@
     <ClInclude Include="CameraSystem.h">
       <Filter>Header Files\Systems</Filter>
     </ClInclude>
+    <ClInclude Include="ShaderParams.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Shaders\default_frag.glsl">
@@ -350,6 +353,9 @@
       <Filter>Assets\Shaders</Filter>
     </None>
     <None Include="Assets\Shaders\grass_geo.glsl">
+      <Filter>Assets\Shaders</Filter>
+    </None>
+    <None Include="Assets\Shaders\grass_frag.glsl">
       <Filter>Assets\Shaders</Filter>
     </None>
   </ItemGroup>

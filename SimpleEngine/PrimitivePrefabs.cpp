@@ -266,7 +266,7 @@ namespace Prefabs {
 		// Create grass material component
 		Material grassMaterial;
 		grassMaterial.shader = &GLUtils::getTerrainGrassGeoShader();
-		grassMaterial.colorMaps.push_back(GLUtils::loadTexture("Assets/Textures/random-texture.png"));
+		grassMaterial.colorMaps.push_back(GLUtils::loadTexture("Assets/Textures/weedy_grass.png"));
 		grassMaterial.willDrawDepth = true;
 		grassMaterial.shaderParams.metallicness = 0;
 		grassMaterial.shaderParams.glossiness = 0;

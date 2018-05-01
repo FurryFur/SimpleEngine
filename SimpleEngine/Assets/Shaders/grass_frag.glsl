@@ -109,9 +109,10 @@ void main(void)
 	for (uint i = 0; i < u.numSpotlights; ++i) {
 		LrSpotlight += calcLrSpotlight(Cdiff, Cspec, normal, viewDir, u.spotlightPositions[i].xyz, u.spotlightDirections[i].xyz, u.spotlightColors[i].rgb, specPow, specNorm);
 	}
-	vec3 LrDirect = LiDirect * (Fdiff + BRDFspec) * ndotl;
+	vec3 LrDirect = LiDirect * (Fdiff * 0.5f + BRDFspec) * ndotl;
+	vec3 LrSubsurface = LiDirect * Fdiff * 0.5f;
 	vec3 LrAmbDiff= LiIrr * FdiffRefl;
 	vec3 LrAmbSpec = LiRefl * FspecRefl;
 
-	outColor = vec4(LrDirect + LrSpotlight + LrAmbDiff + LrAmbSpec, color.a);
+	outColor = vec4(LrDirect + LrSubsurface + LrSpotlight + LrAmbDiff + LrAmbSpec, color.a);
 }

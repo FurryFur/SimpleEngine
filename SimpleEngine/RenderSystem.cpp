@@ -139,6 +139,9 @@ void RenderSystem::endFrame()
 	glBindFramebuffer(m_renderState.sceneFramebuffer.target, 0);
 	glClear(GL_COLOR_BUFFER_BIT);
 
+	// Apply gamma correction
+	glEnable(GL_FRAMEBUFFER_SRGB);
+
 	// Render full screen quad with post process shader
 	m_renderState.postProcessShader->use();
 	glDisable(GL_DEPTH_TEST);
@@ -152,6 +155,9 @@ void RenderSystem::endFrame()
 	glEnable(GL_DEPTH_TEST);
 	glBindVertexArray(0);
 	glBindTexture(m_renderState.sceneColorBuffer.target, 0);
+
+	// Disable gamma correction
+	glDisable(GL_FRAMEBUFFER_SRGB);
 
 	glfwSwapBuffers(m_renderState.glContext);
 }
