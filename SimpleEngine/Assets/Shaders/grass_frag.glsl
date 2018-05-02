@@ -25,7 +25,7 @@ layout (std140) uniform UniformBlock {
 	float time;
 } u;
 
-uniform sampler2D colorSampler;
+uniform sampler2D texSampler0;
 uniform samplerCube radianceSampler;
 uniform samplerCube irradianceSampler;
 
@@ -77,7 +77,7 @@ void main(void)
 	else
 		normal = -normalize(i.normal);
 
-	vec4 color = texture(colorSampler, i.texCoord);
+	vec4 color = texture(texSampler0, i.texCoord);
 
 	if (u.discardTransparent && color.a < 0.5f)
 		discard;

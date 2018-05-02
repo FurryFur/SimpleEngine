@@ -70,7 +70,7 @@ namespace GLUtils {
 
 	// Loads a texture to GPU memory.
 	// Returns a texture object with GPU handler and texture target.
-	Texture loadTexture(const std::string& paths);
+	Texture loadTexture(const std::string& paths, bool sRGB = true, bool generateMipmaps = true);
 
 	// Loads a cube map to GPU memory.
 	// Returns a texture object with GPU handler and texture target.

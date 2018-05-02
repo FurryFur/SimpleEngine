@@ -308,6 +308,7 @@ namespace Prefabs {
 		Material grassMaterial;
 		grassMaterial.shader = &GLUtils::getTerrainGrassGeoShader();
 		grassMaterial.colorMaps.push_back(GLUtils::loadTexture("Assets/Textures/weedy_grass.png"));
+		grassMaterial.colorMaps.push_back(GLUtils::loadTexture("Assets/Textures/vegetation_map.png", false, false));
 		grassMaterial.heightMaps.push_back(heightMap);
 		grassMaterial.heightMapScale = heightScale;
 		grassMaterial.willDrawDepth = true;

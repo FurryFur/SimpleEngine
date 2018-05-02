@@ -13,6 +13,7 @@
 
 #include "RenderSystem.h"
 
+#include "Utils.h"
 #include "GLUtils.h"
 #include "GLMUtils.h"
 #include "Material.h"
@@ -246,12 +247,9 @@ void RenderSystem::renderModel(const ModelComponent& model, const glm::mat4& tra
 		for (GLsizei j = 0; j < material.colorMaps.size(); ++j) {
 			const Texture& texture = material.colorMaps.at(j);
 			glActiveTexture(GL_TEXTURE0 + textureUnit);
-			glUniform1i(material.shader->getUniformLocation("colorSampler"), textureUnit);
+			glUniform1i(material.shader->getUniformLocation("texSampler" + toString(j)), textureUnit);
 			glBindTexture(texture.target, texture.id);
 			++textureUnit;
-
-			// Just doing 1 diffuse texture currently
-			break;
 		}
 
 		for (GLsizei j = 0; j < material.metallicnessMaps.size(); ++j) {

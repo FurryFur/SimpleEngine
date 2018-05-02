@@ -196,7 +196,7 @@ GLuint GLUtils::bufferMeshData(const std::vector<VertexFormat>& vertices, const 
 	return VAO;
 }
 
-Texture GLUtils::loadTexture(const std::string& path)
+Texture GLUtils::loadTexture(const std::string& path, bool sRGB, bool generateMipmaps)
 {
 	// Cached textures that have already been loaded
 	static std::unordered_map<std::string, Texture> s_loadedTextures;
@@ -221,24 +221,38 @@ Texture GLUtils::loadTexture(const std::string& path)
 		}
 		else if (nrComponents == 3) {
 			format = GL_RGB;
-			internalFormat = GL_SRGB;
+			if (sRGB)
+				internalFormat = GL_SRGB;
+			else
+				internalFormat = format;
 		}
 		else if (nrComponents == 4) {
 			format = GL_RGBA;
-			internalFormat = GL_SRGB_ALPHA;
+			if (sRGB)
+				internalFormat = GL_SRGB_ALPHA;
+			else
+				internalFormat = format;
 		}
 
 		glGenTextures(1, &texture.id);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(texture.target, texture.id);
 
-		glTexParameteri(texture.target, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(texture.target, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(texture.target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(texture.target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		if (generateMipmaps) {
+			glTexParameteri(texture.target, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameteri(texture.target, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			glTexParameteri(texture.target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			glTexParameteri(texture.target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		}
+		else {
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		}
 
 		glTexImage2D(texture.target, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, textureData);
-		glGenerateMipmap(texture.target);
+
+		if (generateMipmaps)
+			glGenerateMipmap(texture.target);
 
 		glBindTexture(texture.target, 0);
 
@@ -276,6 +290,12 @@ Texture GLUtils::loadCubeMapFaces(const std::vector<std::string>& facePaths)
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(texture.target, texture.id);
 
+	glTexParameteri(texture.target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(texture.target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(texture.target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(texture.target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(texture.target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
 	for (GLenum i = 0; i < facePaths.size(); ++i) {
 		//stbi_set_flip_vertically_on_load(true);
 		int width, height, nrComponents;
@@ -307,12 +327,6 @@ Texture GLUtils::loadCubeMapFaces(const std::vector<std::string>& facePaths)
 
 		stbi_image_free(faceData);
 	}
-
-	glTexParameteri(texture.target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(texture.target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(texture.target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(texture.target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(texture.target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
 	glBindTexture(texture.target, 0);
 

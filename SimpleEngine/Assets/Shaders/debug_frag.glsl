@@ -27,7 +27,7 @@ layout (std140) uniform UniformBlock {
 
 uniform vec3 debugColor;
 
-uniform sampler2D colorSampler;
+uniform sampler2D texSampler0;
 uniform samplerCube radianceSampler;
 uniform samplerCube irradianceSampler;
 

@@ -22,11 +22,11 @@ layout (std140) uniform UniformBlock {
 	float time;
 } u;
 
-uniform samplerCube colorSampler;
+uniform samplerCube texSampler0;
 
 void main(void)
 {
-    outColor = texture(colorSampler, i.textureDir);
+    outColor = texture(texSampler0, i.textureDir);
 
 	if (u.discardTransparent && outColor.a < 0.5f)
 		discard;
