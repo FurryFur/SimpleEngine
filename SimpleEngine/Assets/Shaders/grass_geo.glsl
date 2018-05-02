@@ -35,6 +35,7 @@ out VertexData {
 
 const vec3 windDir = vec3(0, 0, -1);
 const float windMagnitude = 0.75f;
+const float snapDistance = 0.1f;
 
 uniform sampler2D texSampler1;
 
@@ -53,8 +54,11 @@ void main() {
 		triCenter += gs_in[i].worldPos;
 	}
 	triCenter /= 3;
+	
+	// Snap to grid
+	vec3 grassBase = floor(triCenter / snapDistance) * snapDistance;
 
-	if (random(floor(triCenter.xz)) <= vegetationChance) {
+	if (random(grassBase.xy) <= vegetationChance) {
 		vec3 u = normalize(gs_in[1].worldPos - gs_in[0].worldPos);
 		vec3 v = gs_in[2].worldPos - gs_in[0].worldPos;
 		vec3 n = normalize(cross(u, v));
@@ -65,10 +69,10 @@ void main() {
 
 		for (int i = 0; i < 2; ++i) {
 			// Wind
-			vec3 lowerLeft = triCenter - 0.5f * tangentSpace[0];
-			vec3 lowerRight = triCenter + 0.5f * tangentSpace[0];
-			vec3 upperLeft = triCenter - 0.5f * tangentSpace[0] + vec3(0, 1.0f, 0);
-			vec3 upperRight = triCenter + 0.5f * tangentSpace[0] + vec3(0, 1.0f, 0);
+			vec3 lowerLeft = grassBase - 0.5f * tangentSpace[0];
+			vec3 lowerRight = grassBase + 0.5f * tangentSpace[0];
+			vec3 upperLeft = grassBase - 0.5f * tangentSpace[0] + vec3(0, 1.0f, 0);
+			vec3 upperRight = grassBase + 0.5f * tangentSpace[0] + vec3(0, 1.0f, 0);
 			float leftWindCoord = -dot(upperLeft, windDir);
 			float rightWindCoord = -dot(upperRight, windDir);
 			vec3 upperLeftOffset = windDir * windMagnitude * (sin(leftWindCoord + sh.time) + 1);
