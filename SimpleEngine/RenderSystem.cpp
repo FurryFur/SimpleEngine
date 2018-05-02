@@ -26,6 +26,7 @@
 #include "RenderBuffer.h"
 #include "FrameBuffer.h"
 #include "GLPrimitives.h"
+#include "Clock.h"
 
 #include <glad\glad.h>
 #include <GLFW\glfw3.h>
@@ -242,7 +243,7 @@ void RenderSystem::renderModel(const ModelComponent& model, const glm::mat4& tra
 		// Tell the gpu what diffuse textures to use
 		// TODO: Send all textures to the GPU, not just 1
 		GLuint textureUnit = 0;
-		for (size_t j = 0; j < material.colorMaps.size(); ++j) {
+		for (GLsizei j = 0; j < material.colorMaps.size(); ++j) {
 			const Texture& texture = material.colorMaps.at(j);
 			glActiveTexture(GL_TEXTURE0 + textureUnit);
 			glUniform1i(material.shader->getUniformLocation("colorSampler"), textureUnit);
@@ -253,7 +254,7 @@ void RenderSystem::renderModel(const ModelComponent& model, const glm::mat4& tra
 			break;
 		}
 
-		for (size_t j = 0; j < material.metallicnessMaps.size(); ++j) {
+		for (GLsizei j = 0; j < material.metallicnessMaps.size(); ++j) {
 			const Texture& texture = material.metallicnessMaps.at(j);
 			glActiveTexture(GL_TEXTURE0 + textureUnit);
 			glUniform1i(material.shader->getUniformLocation("metallicnessSampler"), textureUnit);
@@ -261,6 +262,29 @@ void RenderSystem::renderModel(const ModelComponent& model, const glm::mat4& tra
 			++textureUnit;
 
 			// Just doing 1 specular texture currently
+			break;
+		}
+
+		for (GLsizei j = 0; j < material.heightMaps.size(); ++j) {
+			const Texture& texture = material.heightMaps.at(j);
+			glActiveTexture(GL_TEXTURE0 + textureUnit);
+			glUniform1i(material.shader->getUniformLocation("heightMapSampler"), textureUnit);
+			glUniform1f(material.shader->getUniformLocation("heightMapScale"), material.heightMapScale);
+			glBindTexture(texture.target, texture.id);
+			++textureUnit;
+
+			// Just doing 1 height map currently
+			break;
+		}
+
+		for (GLsizei j = 0; j < material.normalMaps.size(); ++j) {
+			const Texture& texture = material.normalMaps.at(j);
+			glActiveTexture(GL_TEXTURE0 + textureUnit);
+			glUniform1i(material.shader->getUniformLocation("normalMapSampler"), textureUnit);
+			glBindTexture(texture.target, texture.id);
+			++textureUnit;
+
+			// Just doing 1 normal map currently
 			break;
 		}
 
@@ -282,6 +306,7 @@ void RenderSystem::renderModel(const ModelComponent& model, const glm::mat4& tra
 		uniformBlock.metallicness = material.shaderParams.metallicness;
 		uniformBlock.glossiness = material.shaderParams.glossiness;
 		uniformBlock.specBias = material.shaderParams.specBias;
+		uniformBlock.time = Clock::getTime();
 
 		// Set spotlights
 		uniformBlock.numSpotlights = std::min(static_cast<GLuint>(s_renderState.spotlights.size()), UniformBlockFormat::s_kMaxSpotlights);

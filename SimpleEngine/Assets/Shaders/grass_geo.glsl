@@ -16,6 +16,7 @@ layout (std140) uniform UniformBlock {
 	float glossiness;
 	float specBias;
 	bool discardTransparent;
+	float time;
 } sh;
 
 in VertexData {
@@ -31,6 +32,9 @@ out VertexData {
 	vec3 viewDir;
 	vec3 worldPos;
 } gs_out;
+
+const vec3 windDir = vec3(0, 0, -1);
+const float windMagnitude = 0.75f;
 
 void main() {
 	vec3 triCenter = vec3(0, 0, 0);
@@ -48,10 +52,18 @@ void main() {
 	const mat4 vp = sh.projection * sh.view;
 
 	for (int i = 0; i < 2; ++i) {
-		vec3 lowerLeft = triCenter - 0.5f * tangentSpace[0];
+		vec3 lowerLeft  = triCenter - 0.5f * tangentSpace[0];
 		vec3 lowerRight = triCenter + 0.5f * tangentSpace[0];
-		vec3 upperLeft = triCenter - 0.5f * tangentSpace[0] + vec3(0, 1.0f, 0);
+		vec3 upperLeft  = triCenter - 0.5f * tangentSpace[0] + vec3(0, 1.0f, 0);
 		vec3 upperRight = triCenter + 0.5f * tangentSpace[0] + vec3(0, 1.0f, 0);
+		float leftWindCoord = -dot(upperLeft, windDir);
+		float rightWindCoord = -dot(upperRight, windDir);
+		vec3 upperLeftOffset = windDir * windMagnitude * (sin(leftWindCoord + sh.time) + 1);
+		vec3 upperRightOffset = windDir * windMagnitude * (sin(rightWindCoord + sh.time) + 1);
+		float leftBendability = dot(n, normalize(upperLeft + upperLeftOffset - lowerLeft));
+		float rightBendability = dot(n, normalize(upperRight + upperRightOffset - lowerRight));
+		upperLeft += upperLeftOffset * leftBendability;
+		upperRight += upperRightOffset * rightBendability;
 		vec3 quadNormal = cross(lowerRight - lowerLeft, upperLeft - lowerLeft);
 
 		// Lower Left

@@ -40,5 +40,6 @@ struct UniformBlockFormat {
 	GLfloat metallicness;
 	GLfloat glossiness;
 	GLfloat specBias;
-	bool discardTransparent;
+	GLboolean discardTransparent;
+	GLfloat time;
 };

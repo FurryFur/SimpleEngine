@@ -22,6 +22,7 @@ layout (std140) uniform UniformBlock {
 	float glossiness;
 	float specBias;
 	bool discardTransparent;
+	float time;
 } u;
 
 uniform vec3 debugColor;

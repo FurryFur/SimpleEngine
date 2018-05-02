@@ -24,6 +24,7 @@ layout (std140) uniform UniformBlock {
 	float glossiness;
 	float specBias;
 	bool discardTransparent;
+	float time;
 } u;
 
 void main()

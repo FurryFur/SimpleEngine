@@ -35,4 +35,5 @@ struct Material {
 	std::vector<Texture> displacementMaps;
 	bool willDrawDepth;
 	glm::vec3 debugColor;
+	float heightMapScale;
 };

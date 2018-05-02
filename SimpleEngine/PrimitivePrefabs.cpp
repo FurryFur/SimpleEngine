@@ -169,13 +169,13 @@ namespace Prefabs {
 		unsigned char* heightMapImg = stbi_load(heightMapFile.c_str(), &numPixelsX, &numPixelsY, &numChannels, 0);
 
 		// Convert to array of floats
-		std::vector<float> heightMap;
-		heightMap.resize(numPixelsX * numPixelsY);
+		std::vector<float> heightMapData(numPixelsX * numPixelsY);
 		for (GLsizei r = 0; r < numPixelsY; ++r) {
 			for (GLsizei c = 0; c < numPixelsX; ++c) {
-				heightMap[r * numPixelsX + c] = heightMapImg[(r * numPixelsX + c) * numChannels] / 255.0f; // Ignore any extra channels by skipping over them
+				heightMapData[r * numPixelsX + c] = heightMapImg[(r * numPixelsX + c) * numChannels] / 255.0f; // Ignore any extra channels by skipping over them
 			}
 		}
+		Texture heightMap = Texture::Texture2D(numPixelsX, numPixelsY, GL_RED, GL_FLOAT, heightMapData.data());
 
 		stbi_image_free(heightMapImg);
 
@@ -213,32 +213,37 @@ namespace Prefabs {
 			heightMapR = static_cast<GLsizei>(glm::round(v * (numPixelsY - 1)));
 		};
 
-		// Apply heightmap to tesselated quad
-		for (GLsizei r = 0; r < numVertsX; ++r) {
-			for (GLsizei c = 0; c < numVertsZ; ++c) {
-				GLsizei heightMapR, heightMapC;
-				meshIdxToHeightMapIdx(r, c, heightMapR, heightMapC);
-				meshVertices[r * numVertsX + c].position.y += heightMap[heightMapR * numPixelsX + heightMapC] * heightScale;
-			}
-		}
+		auto heightMapIdxToVertPos = [size, numPixelsX, numPixelsY, &heightMapData, heightScale, position](GLsizei r, GLsizei c) -> vec3 {
+			const float extent = size / 2;
+			const float xSpacing = size / (numPixelsX - 1);
+			const float zSpacing = size / (numPixelsY - 1);
 
-		// Compute smoothed heightmap normals
-		for (size_t r = 0; r < numVertsZ; ++r) {
-			for (size_t c = 0; c < numVertsX; ++c) {
+			vec3 vertPos;
+			vertPos.x = c * xSpacing - extent;
+			vertPos.y = heightMapData[r * numPixelsX + c] * heightScale;
+			vertPos.z = r * zSpacing - extent;
+			vertPos += position; // Offset by overall terrain position
+			return vertPos;
+		};
+
+		// Compute normal map
+		std::vector<vec3> normalMapData(numPixelsX * numPixelsY);
+		for (GLsizei r = 0; r < numPixelsY; ++r) {
+			for (GLsizei c = 0; c < numPixelsX; ++c) {
 
 				// Compute and accumulate tri normals surrounding vertex
-				glm::vec3 normalAccumulator = { 0, 0, 0 };
-				size_t numSurroundingTris = 0;
+				vec3 normalAccumulator = { 0, 0, 0 };
+				GLsizei numSurroundingTris = 0;
 				for (int i = -1; i < 1; ++i) {
 					for (int j = -1; j < 1; ++j) {
 						// Get corresponding cell verts
-						std::array<VertexFormat*, 4> cellVerts;
-						for (size_t k = 0; k < cellVerts.size(); ++k) {
-							size_t vertR = r + i + (k / 2);
-							size_t vertC = c + j + (k % 2);
-							vertR = vertR < numVertsZ ? vertR : r; // Unsigned number always greater than or equal to 0
-							vertC = vertC < numVertsX ? vertC : c; // Unsigned number always greater than or equal to 0
-							cellVerts[k] = &meshVertices[vertR * numVertsX + vertC];
+						std::array<vec3, 4> cellVerts;
+						for (GLsizei k = 0; k < cellVerts.size(); ++k) {
+							GLsizei pixelR = r + i + (k / 2);
+							GLsizei pixelC = c + j + (k % 2);
+							pixelR = pixelR >= 0 && pixelR < numPixelsY ? pixelR : r;
+							pixelC = pixelC >= 0 && pixelC < numPixelsX ? pixelC : c;
+							cellVerts[k] = heightMapIdxToVertPos(pixelR, pixelC);
 						}
 
 						// Get vertices for each tri in cell
@@ -246,13 +251,13 @@ namespace Prefabs {
 						// |\ |
 						// | \| 
 						// 2--3
-						std::array<std::array<VertexFormat*, 3>, 2> tris = { { { cellVerts[0], cellVerts[2], cellVerts[3] },
-						{ cellVerts[0], cellVerts[3], cellVerts[1] } } };
+						std::array<std::array<vec3, 3>, 2> tris = { { { cellVerts[0], cellVerts[2], cellVerts[3] },
+						                                              { cellVerts[0], cellVerts[3], cellVerts[1] } } };
 
 						// Compute and accumulate normals for each tri in cell
 						for (auto& triVerts : tris) {
-							vec3 edge1 = triVerts[1]->position - triVerts[0]->position;
-							vec3 edge2 = triVerts[2]->position - triVerts[0]->position;
+							vec3 edge1 = triVerts[1] - triVerts[0];
+							vec3 edge2 = triVerts[2] - triVerts[0];
 
 							vec3 normal = cross(edge1, edge2);
 							if (normal.x != 0 || normal.y != 0 || normal.z != 0) { // Can't normalize zero vectors generated at edges
@@ -262,9 +267,11 @@ namespace Prefabs {
 						}
 					}
 				}
-				meshVertices[r * numVertsX + c].normal = normalAccumulator / static_cast<float>(numSurroundingTris);
+				normalMapData[r * numPixelsX + c] = normalize(normalAccumulator / static_cast<float>(numSurroundingTris));
 			}
 		}
+		// Create GPU normalMap Texture
+		Texture normalMap = Texture::Texture2D(numPixelsX, numPixelsY, GL_RGB, GL_FLOAT, normalMapData.data());
 
 		// Create GPU mesh
 		Mesh mesh{
@@ -288,6 +295,9 @@ namespace Prefabs {
 		Material terrainMaterial;
 		terrainMaterial.shader = &GLUtils::getTerrainShader();
 		terrainMaterial.colorMaps.push_back(GLUtils::loadTexture("Assets/Textures/dessert-floor.png"));
+		terrainMaterial.normalMaps.push_back(normalMap);
+		terrainMaterial.heightMaps.push_back(heightMap);
+		terrainMaterial.heightMapScale = heightScale;
 		terrainMaterial.willDrawDepth = true;
 		terrainMaterial.shaderParams.metallicness = 0;
 		terrainMaterial.shaderParams.glossiness = 0;
@@ -298,122 +308,8 @@ namespace Prefabs {
 		Material grassMaterial;
 		grassMaterial.shader = &GLUtils::getTerrainGrassGeoShader();
 		grassMaterial.colorMaps.push_back(GLUtils::loadTexture("Assets/Textures/weedy_grass.png"));
-		grassMaterial.willDrawDepth = true;
-		grassMaterial.shaderParams.metallicness = 0;
-		grassMaterial.shaderParams.glossiness = 0;
-		grassMaterial.shaderParams.specBias = 0;
-		terrain.model.materials.push_back(std::move(grassMaterial));
-
-		return terrain;
-	}
-
-	Entity& createTerrain(Scene& scene, const std::string& heightMapFile, float width, float height, const glm::vec3& position)
-	{
-		const float heightScale = width * height * 0.001f;
-
-		// Read height map from file
-		int numVertsX, numVertsZ, numChannels;
-		unsigned char* heightMapImg = stbi_load(heightMapFile.c_str(), &numVertsX, &numVertsZ, &numChannels, 0);
-
-		// Convert to array of floats
-		std::vector<float> heightMap;
-		heightMap.resize(numVertsX * numVertsZ);
-		for (size_t r = 0; r < numVertsZ; ++r) {
-			for (size_t c = 0; c < numVertsX; ++c) {
-				heightMap[r * numVertsX + c] = heightMapImg[(r * numVertsX + c) * numChannels] / 255.0f; // Ignore any extra channels by skipping over them
-			}
-		}
-
-		stbi_image_free(heightMapImg);
-
-		// Create tesselated quad with save number of vertices as heightmap pixels
-		std::vector<VertexFormat> meshVertices;
-		std::vector<GLuint> meshIndices;
-		createTessellatedQuadData(numVertsX, numVertsZ, width, height, meshVertices, meshIndices);
-
-		// Apply heightmap to tesselated quad
-		for (size_t r = 0; r < numVertsZ; ++r) {
-			for (size_t c = 0; c < numVertsX; ++c) {
-				meshVertices[r * numVertsX + c].position.y += heightMap[r * numVertsX + c] * heightScale;
-			}
-		}
-
-		// Compute smoothed heightmap normals
-		for (size_t r = 0; r < numVertsZ; ++r) {
-			for (size_t c = 0; c < numVertsX; ++c) {
-
-				// Compute and accumulate tri normals surrounding vertex
-				glm::vec3 normalAccumulator = { 0, 0, 0 };
-				size_t numSurroundingTris = 0;
-				for (int i = -1; i < 1; ++i) {
-					for (int j = -1; j < 1; ++j) {
-						// Get corresponding cell verts
-						std::array<VertexFormat*, 4> cellVerts;
-						for (size_t k = 0; k < cellVerts.size(); ++k) {
-							size_t vertR = r + i + (k / 2);
-							size_t vertC = c + j + (k % 2);
-							vertR = vertR < numVertsZ ? vertR : r; // Unsigned number always greater than or equal to 0
-							vertC = vertC < numVertsX ? vertC : c; // Unsigned number always greater than or equal to 0
-							cellVerts[k] = &meshVertices[vertR * numVertsX + vertC];
-						}
-
-						// Get vertices for each tri in cell
-						// 0--1
-						// |\ |
-						// | \| 
-						// 2--3
-						std::array<std::array<VertexFormat*, 3>, 2> tris = { { { cellVerts[0], cellVerts[2], cellVerts[3] }, 
-						                                                       { cellVerts[0], cellVerts[3], cellVerts[1] } } };
-
-						// Compute and accumulate normals for each tri in cell
-						for (auto& triVerts : tris) {
-							vec3 edge1 = triVerts[1]->position - triVerts[0]->position;
-							vec3 edge2 = triVerts[2]->position - triVerts[0]->position;
-
-							vec3 normal = cross(edge1, edge2);
-							if (normal.x != 0 || normal.y != 0 || normal.z != 0) { // Can't normalize zero vectors generated at edges
-								normalAccumulator += normalize(normal);
-								++numSurroundingTris;
-							}
-						}
-					}
-				}
-				meshVertices[r * numVertsX + c].normal = normalAccumulator / static_cast<float>(numSurroundingTris);
-			}
-		}
-
-		// Create GPU mesh
-		Mesh mesh{
-			0, // Use the first material on the model
-			GLUtils::bufferMeshData(meshVertices, meshIndices),
-			static_cast<GLsizei>(meshIndices.size())
-		};
-
-		// Create the terrain entity
-		Entity& terrain = scene.createEntity(COMPONENT_MODEL, COMPONENT_TRANSFORM);
-		terrain.transform.position = position;
-
-		// Fill model component with mesh data
-		terrain.model.rootNode.meshIDs.push_back(0);
-		terrain.model.rootNode.meshIDs.push_back(1);
-		terrain.model.meshes.push_back(mesh);
-		terrain.model.meshes.push_back(mesh);
-		terrain.model.meshes[1].materialIndex = 1;
-
-		// Create terrain material component
-		Material terrainMaterial;
-		terrainMaterial.shader = &GLUtils::getDefaultShader();
-		terrainMaterial.colorMaps.push_back(GLUtils::loadTexture("Assets/Textures/dessert-floor.png"));
-		terrainMaterial.willDrawDepth = true;
-		terrainMaterial.shaderParams.metallicness = 0;
-		terrainMaterial.shaderParams.glossiness = 0;
-		terrainMaterial.shaderParams.specBias = 0;
-		terrain.model.materials.push_back(std::move(terrainMaterial));
-
-		// Create grass material component
-		Material grassMaterial;
-		grassMaterial.shader = &GLUtils::getTerrainGrassGeoShader();
-		grassMaterial.colorMaps.push_back(GLUtils::loadTexture("Assets/Textures/weedy_grass.png"));
+		grassMaterial.heightMaps.push_back(heightMap);
+		grassMaterial.heightMapScale = heightScale;
 		grassMaterial.willDrawDepth = true;
 		grassMaterial.shaderParams.metallicness = 0;
 		grassMaterial.shaderParams.glossiness = 0;

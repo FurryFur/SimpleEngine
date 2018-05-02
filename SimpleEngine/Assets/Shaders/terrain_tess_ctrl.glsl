@@ -15,6 +15,7 @@ layout (std140) uniform UniformBlock {
 	float glossiness;
 	float specBias;
 	bool discardTransparent;
+	float time;
 } u;
 
 in ControlPointData {
@@ -35,7 +36,7 @@ out ControlPointData {
 float getTessLevel(vec3 vertA, vec3 vertB) {
 	vec3 edgeCenter = (vertA + vertB) / 2;
 	float distanceFromCamera = distance(u.cameraPos.xyz, edgeCenter);
-	return clamp(100 / distanceFromCamera, 1, 8);
+	return clamp(1000 / distanceFromCamera, 1, 24);
 }
 
 void main()
