@@ -1,6 +1,6 @@
 #version 420 core
 
-layout (triangles, fractional_odd_spacing, ccw) in;
+layout (triangles, equal_spacing, ccw) in;
 
 layout (std140) uniform UniformBlock {
     mat4 model;

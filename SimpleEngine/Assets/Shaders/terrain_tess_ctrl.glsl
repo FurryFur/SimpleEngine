@@ -36,7 +36,10 @@ out ControlPointData {
 float getTessLevel(vec3 vertA, vec3 vertB) {
 	vec3 edgeCenter = (vertA + vertB) / 2;
 	float distanceFromCamera = distance(u.cameraPos.xyz, edgeCenter);
-	return clamp(1000 / distanceFromCamera, 1, 24);
+	float normalizedDistance = clamp(distanceFromCamera / 250.0f, 0, 1);
+	const float bucketSize = 8;
+	const float maxTess = 64;
+	return clamp(floor((mix(maxTess, 0, normalizedDistance) / bucketSize)) * bucketSize, 1, maxTess);
 }
 
 void main()
