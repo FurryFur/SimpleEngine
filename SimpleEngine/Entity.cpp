@@ -20,6 +20,9 @@ Entity::Entity(std::vector<EntityEventListener*>& eventListeners)
 	, playerStats{}
 	, snakeTail{}
 	, basicCameraMovement{}
+	, terrain{}
+	, terrainFollow{}
+	, simpleWorldSpaceMovement{}
 {
 }
 

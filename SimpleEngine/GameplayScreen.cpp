@@ -13,6 +13,8 @@
 #include "SnakeTailSystem.h"
 #include "BasicCameraMovementSystem.h"
 #include "Utils.h"
+#include "Terrain.h"
+#include "TerrainFollowSystem.h"
 
 #include <cmath>
 #include <list>
@@ -21,6 +23,7 @@ GameplayScreen::GameplayScreen()
 {
 	// Init systems
 	m_activeSystems.push_back(std::make_unique<InputSystem>(m_scene));
+	m_activeSystems.push_back(std::make_unique<TerrainFollowSystem>(m_scene));
 	auto basicCameraMovementSystem = std::make_unique<BasicCameraMovementSystem>(m_scene);
 	auto renderSystem = std::make_unique<RenderSystem>(m_scene);
 
@@ -44,7 +47,7 @@ GameplayScreen::GameplayScreen()
 	basicCameraMovementSystem->setCameraToControl(&cameraEntity);
 
 	//Prefabs::createTerrain(m_scene, "Assets/Textures/Heightmaps/heightmap_2.png", 100, 100);
-	Prefabs::createTessTerrain(m_scene, "Assets/Textures/Heightmaps/heightmap_2.png", 1000);
+	Entity& terrain = Prefabs::createTerrain(m_scene, "Assets/Textures/Heightmaps/heightmap_2.png", 1000);
 
 	Entity& reflectiveSphere = Prefabs::createSphere(m_scene);
 	reflectiveSphere.transform.position += glm::vec3(0, 50, 0);
@@ -60,6 +63,8 @@ GameplayScreen::GameplayScreen()
 	diffuseSphere.model.materials[0].shaderParams.glossiness = 0.0f;
 	diffuseSphere.model.materials[0].shaderParams.metallicness = 0.0f;
 	diffuseSphere.model.materials[0].shaderParams.specBias = -0.04f;
+	diffuseSphere.addComponents(COMPONENT_TERRAIN_FOLLOW);
+	diffuseSphere.terrainFollow.terrainToFollow = &terrain;
 
 	m_activeSystems.push_back(std::move(renderSystem));
 	m_activeSystems.push_back(std::move(basicCameraMovementSystem));

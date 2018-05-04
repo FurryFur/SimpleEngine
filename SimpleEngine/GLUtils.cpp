@@ -165,6 +165,46 @@ const Shader& GLUtils::getTerrainShader()
 	return s_shader;
 }
 
+void GLUtils::createTessellatedQuadData(GLsizei numVertsX, GLsizei numVertsZ, float width, float height, std::vector<VertexFormat>& vertices, std::vector<GLuint>& indices)
+{
+	{
+		const GLsizei numCellsX = numVertsX - 1;
+		const GLsizei numCellsZ = numVertsZ - 1;
+		const GLsizei numIndicesPerCell = 6;
+		const GLsizei numIndices = numCellsX * numCellsZ * numIndicesPerCell;
+		const float xExtent = width / 2;
+		const float zExtent = height / 2;
+		const float xSpacing = width / (numVertsX - 1);
+		const float zSpacing = height / (numVertsZ - 1);
+		vertices.resize(numVertsX * numVertsZ);
+
+		// Create vertices
+		for (GLsizei r = 0; r < numVertsZ; ++r) {
+			for (GLsizei c = 0; c < numVertsX; ++c) {
+				float x = -xExtent + c * xSpacing;
+				float z = -zExtent + r * zSpacing;
+				vertices[r * numVertsX + c].position = glm::vec3{ x, 0, z };
+				vertices[r * numVertsX + c].normal = glm::vec3{ 0, 1, 0 };
+				vertices[r * numVertsX + c].texCoord = glm::vec2{ (x + xExtent) / width, (z + zExtent) / height };
+			}
+		}
+
+		// Create indices
+		indices.resize(numIndices);
+		for (GLsizei r = 0; r < numCellsZ; ++r) {
+			for (GLsizei c = 0; c < numCellsX; ++c) {
+				indices[(r * numCellsX + c) * numIndicesPerCell] = r * numVertsX + c;
+				indices[(r * numCellsX + c) * numIndicesPerCell + 1] = (r + 1) * numVertsX + c;
+				indices[(r * numCellsX + c) * numIndicesPerCell + 2] = (r + 1) * numVertsX + c + 1;
+
+				indices[(r * numCellsX + c) * numIndicesPerCell + 3] = r * numVertsX + c;
+				indices[(r * numCellsX + c) * numIndicesPerCell + 4] = (r + 1) * numVertsX + c + 1;
+				indices[(r * numCellsX + c) * numIndicesPerCell + 5] = r * numVertsX + c + 1;
+			}
+		}
+	}
+}
+
 GLuint GLUtils::bufferMeshData(const std::vector<VertexFormat>& vertices, const std::vector<GLuint>& indices)
 {
 	GLuint VAO;

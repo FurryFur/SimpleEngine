@@ -64,6 +64,9 @@ namespace GLUtils {
 	// Returns a shader used to render tessellated heightmapped terrain.
 	const Shader& getTerrainShader();
 
+	// Helper function for creating a tesselated quad
+	void createTessellatedQuadData(GLsizei numVertsX, GLsizei numVertsZ, float width, float height, std::vector<VertexFormat>& vertices, std::vector<GLuint>& indices);
+
 	// Buffers vertex and index data to the GPU.
 	// Returns a handler the the VAO associated with the vertices / indices.
 	GLuint bufferMeshData(const std::vector<VertexFormat>& vertices, const std::vector<GLuint>& indices);

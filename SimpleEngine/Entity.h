@@ -11,6 +11,9 @@
 #include "PlayerStatsComponent.h"
 #include "SnakeTailComponent.h"
 #include "BasicCameraMovementComponent.h"
+#include "Terrain.h"
+#include "TerrainFollowComponent.h"
+#include "SimpleWorldSpaceMoveComponent.h"
 
 #include <vector>
 
@@ -27,7 +30,10 @@ enum ComponentType {
 	COMPONENT_PICKUP = 1 << 7,
 	COMPONENT_PLAYERSTATS = 1 << 8,
 	COMPONENT_SNAKETAIL = 1 << 9,
-	COMPONENT_BASIC_CAMERA_MOVEMENT = 1 << 10
+	COMPONENT_BASIC_CAMERA_MOVEMENT = 1 << 10,
+	COMPONENT_TERRAIN = 1 << 11,
+	COMPONENT_TERRAIN_FOLLOW = 1 << 12,
+	COMPONENT_SIMPLE_WORLD_SPACE_MOVE_COMPONENT = 1 << 13
 };
 
 class Entity {
@@ -46,6 +52,9 @@ public:
 	PlayerStatsComponent playerStats;
 	SnakeTailComponent snakeTail;
 	BasicCameraMovementComponent basicCameraMovement;
+	TerrainComponent terrain;
+	TerrainFollowComponent terrainFollow;
+	SimpleWorldSpcaeMoveComponent simpleWorldSpaceMovement;
 
 	Entity(Entity&&) = default;
 	Entity(const Entity&) = delete;

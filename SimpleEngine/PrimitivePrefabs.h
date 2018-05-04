@@ -58,6 +58,4 @@ namespace Prefabs {
 	// Creates an entity from a 3D model file.
 	// The entity returned is a simple entity with only a model and a lookAt component.
 	Entity& createModel(Scene&, const std::string& path, const TransformComponent& transform = {});
-
-	Entity& createTessTerrain(Scene& scene, const std::string& heightMapFile, float size, GLsizei baseTessellation = 50, const glm::vec3& position = { 0, 0, 0 });
 }
