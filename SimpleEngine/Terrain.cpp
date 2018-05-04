@@ -9,36 +9,53 @@
 
 using namespace glm;
 
-bool TerrainUtils::castPosToTerrainHeight(const Entity& terrainEntity, const vec3& pos, float& outHeight)
+bool TerrainUtils::castPosToTerrainHeight(const Entity& terrainEntity, const vec3& entityPos, float& outHeight)
 {
-	ivec2 texCoord;
-	if (!castPosToHeightMapTexCoord(terrainEntity, pos, texCoord))
+	vec2 texCoord;
+	if (!castPosToHeightMapTexCoord(terrainEntity, entityPos, texCoord))
 		return false;
 
+	// Bilinear interpolation
 	float numPixelsX = terrainEntity.terrain.heightMapDimensions.x;
-	float normalizedHeight = terrainEntity.terrain.heightMap[texCoord.y * numPixelsX + texCoord.x];
+	float xBlend = glm::fract(texCoord.x);
+	float yBlend = glm::fract(texCoord.y);
+
+	// Blend top left and top right corners of the 2 by 2 pixel square
+	float heightTopLeft = terrainEntity.terrain.heightMap[glm::floor(texCoord.y) * numPixelsX + glm::floor(texCoord.x)];
+	float heightTopRight = terrainEntity.terrain.heightMap[glm::floor(texCoord.y) * numPixelsX + glm::ceil(texCoord.x)];
+	float heightTop = (1 - xBlend) * heightTopLeft + xBlend * heightTopRight;
+
+	// Blend bottom left and bottom right corners of the 2 by 2 pixel square
+	float heightBottomLeft = terrainEntity.terrain.heightMap[glm::ceil(texCoord.y) * numPixelsX + glm::floor(texCoord.x)];
+	float heightBottomRight = terrainEntity.terrain.heightMap[glm::ceil(texCoord.y) * numPixelsX + glm::ceil(texCoord.x)];
+	float heightBottom = (1 - xBlend) * heightBottomLeft + xBlend * heightBottomRight;
+
+	// Blend the two above results across the y component for final blend
+	float height = (1 - yBlend) * heightTop + yBlend * heightBottom;
+
+	// Scale and offset the height by the terrains offset and height scale
 	float heightScale = terrainEntity.terrain.heightScale;
 	float yOffset = terrainEntity.transform.position.y;
-	outHeight = normalizedHeight * heightScale + yOffset;
+	outHeight = height * heightScale + yOffset;
 
 	return true;
 }
 
-bool TerrainUtils::castPosToHeightMapTexCoord(const Entity& terrainEntity, const vec3& pos, ivec2& outTexCoord)
+bool TerrainUtils::castPosToHeightMapTexCoord(const Entity& terrainEntity, const vec3& entityPos, vec2& outTexCoord)
 {
-	float extent = terrainEntity.terrain.size / 2.0f;
-	const vec3& position = terrainEntity.transform.position;
-	float size = terrainEntity.terrain.size;
-	ivec2 numPixels = terrainEntity.terrain.heightMapDimensions;
-	vec2 xzPos = vec2{ position.x, position.z };
-	vec2 topLeft = xzPos - extent;
-	vec2 normalizedTexCoords = (xzPos - topLeft) / size;
+	float terrainExtent = terrainEntity.terrain.size / 2.0f;
+	float terrainSize = terrainEntity.terrain.size;
+	vec2 terrainPos = vec2{ terrainEntity.transform.position.x, terrainEntity.transform.position.z };
+	vec2 terrainTopLeft = terrainPos - terrainExtent;
+	ivec2 numHeightMapPixels = terrainEntity.terrain.heightMapDimensions;
+	vec2 entityXZPos = vec2{ entityPos.x, entityPos.z };
+	vec2 normalizedTexCoords = (entityXZPos - terrainTopLeft) / terrainSize;
 
 	if (normalizedTexCoords.x < 0 || normalizedTexCoords.y < 0
 	 || normalizedTexCoords.x > 1 || normalizedTexCoords.y > 1)
 		return false;
 
-	outTexCoord = ivec2(round(normalizedTexCoords * vec2(numPixels - 1)));
+	outTexCoord = normalizedTexCoords * vec2(numHeightMapPixels - 1);
 
 	return true;
 }

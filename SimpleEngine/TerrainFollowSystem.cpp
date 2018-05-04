@@ -18,7 +18,9 @@ void TerrainFollowSystem::update(Entity& entity)
 	float terrainHeight;
 	bool success = TerrainUtils::castPosToTerrainHeight(*entity.terrainFollow.terrainToFollow, entity.transform.position, terrainHeight);
 	if (success) {
-		entity.transform.position.y = glm::lerp(entity.transform.position.y, terrainHeight, Clock::getDeltaTime());
+		float yPos = entity.transform.position.y;
+		float halfHeight = entity.terrainFollow.followerHalfHeight;
+		entity.transform.position.y = glm::lerp(yPos, terrainHeight + halfHeight, Clock::getDeltaTime() * 50.0f);
 	}
 }
 

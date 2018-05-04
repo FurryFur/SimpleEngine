@@ -22,7 +22,7 @@ namespace TerrainUtils {
 
 	// Returns true if casting position to heightmap texture coordinate succeeded (position is above terrain).
 	// The texture coordinate is output the outTexCoord parameter
-	bool castPosToHeightMapTexCoord(const Entity& terrainEntity, const glm::vec3& pos, glm::ivec2& outTexCoord);
+	bool castPosToHeightMapTexCoord(const Entity& terrainEntity, const glm::vec3& entityPos, glm::vec2& outTexCoord);
 }
 
 namespace Prefabs {
