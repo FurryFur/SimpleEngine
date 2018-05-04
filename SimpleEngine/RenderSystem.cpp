@@ -28,6 +28,7 @@
 #include "FrameBuffer.h"
 #include "GLPrimitives.h"
 #include "Clock.h"
+#include "Shader.h"
 
 #include <glad\glad.h>
 #include <GLFW\glfw3.h>
@@ -52,7 +53,10 @@ RenderSystem::RenderSystem(Scene& scene)
 	m_renderState.hasRadianceMap = false;
 
 	// Set post processing shader
-	m_renderState.postProcessShader = &GLUtils::getFullscreenQuadShader();
+	m_postProcessShaders.push_back(&GLUtils::getFullscreenQuadShader());
+	m_postProcessShaders.push_back(&GLUtils::getPPEdgeDetectShader());
+	m_curPostProcessShaderIdx = 0;
+	m_renderState.postProcessShader = m_postProcessShaders[m_curPostProcessShaderIdx];
 
 	// Scene framebuffer
 	FrameBuffer& framebuffer = m_renderState.sceneFramebuffer;
@@ -137,12 +141,17 @@ void RenderSystem::beginFrame()
 
 void RenderSystem::endFrame()
 {
+	// Swap the post process shader on keypress
+	static bool lastState = glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_SPACE);
+	if (glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_SPACE) == GLFW_PRESS && lastState == GLFW_RELEASE) {
+		m_curPostProcessShaderIdx = (m_curPostProcessShaderIdx + 1) % m_postProcessShaders.size();
+		m_renderState.postProcessShader = m_postProcessShaders[m_curPostProcessShaderIdx];
+	}
+	lastState = glfwGetKey(glfwGetCurrentContext(), GLFW_KEY_SPACE);
+
 	// Bind and clear the default framebuffer
 	glBindFramebuffer(m_renderState.sceneFramebuffer.target, 0);
 	glClear(GL_COLOR_BUFFER_BIT);
-
-	// Apply gamma correction
-	glEnable(GL_FRAMEBUFFER_SRGB);
 
 	// Render full screen quad with post process shader
 	m_renderState.postProcessShader->use();
@@ -157,9 +166,6 @@ void RenderSystem::endFrame()
 	glEnable(GL_DEPTH_TEST);
 	glBindVertexArray(0);
 	glBindTexture(m_renderState.sceneColorBuffer.target, 0);
-
-	// Disable gamma correction
-	glDisable(GL_FRAMEBUFFER_SRGB);
 
 	glfwSwapBuffers(m_renderState.glContext);
 }

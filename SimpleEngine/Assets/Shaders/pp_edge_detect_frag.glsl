@@ -36,7 +36,7 @@ void main()
     vec3 sampleTex[9];
     for(int i = 0; i < 9; i++)
     {
-        sampleTex[i] = vec3(textureOffset(sceneSampler, texCoord.st, offsets[i]));
+        sampleTex[i] = textureOffset(sceneSampler, texCoord, offsets[i]).rgb;
     }
 
 	// Convolve samples with kernels

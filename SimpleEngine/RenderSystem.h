@@ -26,6 +26,7 @@ class Scene;
 struct GLFWwindow;
 class Entity;
 struct ModelComponent;
+class Shader;
 
 class RenderSystem : public System {
 public:
@@ -71,4 +72,6 @@ private:
 
 	static RenderState s_renderState;
 	RenderState m_renderState;
+	std::vector<const Shader*> m_postProcessShaders;
+	GLsizei m_curPostProcessShaderIdx;
 };

@@ -16,7 +16,7 @@ bool TerrainUtils::castPosToTerrainHeight(const Entity& terrainEntity, const vec
 		return false;
 
 	// Bilinear interpolation
-	float numPixelsX = terrainEntity.terrain.heightMapDimensions.x;
+	int numPixelsX = terrainEntity.terrain.heightMapDimensions.x;
 	float xBlend = glm::fract(texCoord.x);
 	float yBlend = glm::fract(texCoord.y);
 
