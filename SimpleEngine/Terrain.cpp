@@ -192,6 +192,7 @@ Entity& Prefabs::createTerrain(Scene& scene, const std::string& heightMapFile, f
 	grassMaterial.shaderParams.metallicness = 0;
 	grassMaterial.shaderParams.glossiness = 0;
 	grassMaterial.shaderParams.specBias = 0;
+	grassMaterial.shaderParams.discardTransparent = true;
 	terrain.model.materials.push_back(std::move(grassMaterial));
 
 	return terrain;

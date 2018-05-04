@@ -40,6 +40,6 @@ struct UniformBlockFormat {
 	GLfloat metallicness;
 	GLfloat glossiness;
 	GLfloat specBias;
-	GLboolean discardTransparent;
 	GLfloat time;
+	GLboolean discardTransparent; // 1 Byte, needs to come last to avoid issues with std140 padding.
 };

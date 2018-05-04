@@ -14,8 +14,8 @@ layout (std140) uniform UniformBlock {
 	float metallicness;
 	float glossiness;
 	float specBias;
-	bool discardTransparent;
 	float time;
+	bool discardTransparent;
 } u;
 
 in ControlPointData {
